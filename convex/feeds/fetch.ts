@@ -95,6 +95,19 @@ export const fetchSource = internalAction({
 // Helper to add delay between requests
 const delayInternal = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
+// Shuffle array randomly (Fisher-Yates algorithm)
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
+// Max Reddit sources to fetch per cycle (to avoid rate limiting)
+const MAX_REDDIT_SOURCES_PER_FETCH = 3;
+
 // Fetch all active sources (ignores per-project intervals)
 export const fetchAllSources = internalAction({
   args: {},
@@ -109,10 +122,19 @@ export const fetchAllSources = internalAction({
     const redditSources = sources.filter(s => s.feedUrl.includes("reddit.com"));
     const otherSources = sources.filter(s => !s.feedUrl.includes("reddit.com"));
 
-    // Fetch non-Reddit sources first
-    for (let i = 0; i < otherSources.length; i++) {
-      const source = otherSources[i];
-      if (i > 0) await delayInternal(200); // Reduced for faster demo
+    // Shuffle both lists for rotation - different sources get priority each time
+    const shuffledOther = shuffleArray(otherSources);
+    const shuffledReddit = shuffleArray(redditSources);
+    
+    // Limit Reddit sources per fetch to avoid rate limiting
+    const redditToFetch = shuffledReddit.slice(0, MAX_REDDIT_SOURCES_PER_FETCH);
+    
+    console.log(`Fetching ${shuffledOther.length} non-Reddit + ${redditToFetch.length}/${redditSources.length} Reddit sources (randomized)`);
+
+    // Fetch non-Reddit sources first (shuffled order)
+    for (let i = 0; i < shuffledOther.length; i++) {
+      const source = shuffledOther[i];
+      if (i > 0) await delayInternal(200);
 
       const result = await ctx.runAction(internal.feeds.fetch.fetchSource, {
         sourceId: source._id,
@@ -124,9 +146,9 @@ export const fetchAllSources = internalAction({
       }
     }
 
-    // Fetch Reddit sources with longer delays (Reddit rate limits aggressively)
-    for (let i = 0; i < redditSources.length; i++) {
-      const source = redditSources[i];
+    // Fetch limited Reddit sources with longer delays
+    for (let i = 0; i < redditToFetch.length; i++) {
+      const source = redditToFetch[i];
       // 8-12 seconds between Reddit requests to avoid rate limiting
       await delayInternal(8000 + Math.random() * 4000);
 
@@ -141,7 +163,7 @@ export const fetchAllSources = internalAction({
     }
 
     return {
-      total: sources.length,
+      total: shuffledOther.length + redditToFetch.length,
       successful,
       itemsAdded: totalItemsAdded,
     };
@@ -171,9 +193,14 @@ export const fetchSourcesWithInterval = internalAction({
       return (now - lastFetched) >= intervalMs;
     });
 
-    // Separate Reddit from others
-    const redditSources = dueSources.filter(s => s.feedUrl.includes("reddit.com"));
-    const otherSources = dueSources.filter(s => !s.feedUrl.includes("reddit.com"));
+    // Separate Reddit from others and shuffle for rotation
+    const redditSources = shuffleArray(dueSources.filter(s => s.feedUrl.includes("reddit.com")));
+    const otherSources = shuffleArray(dueSources.filter(s => !s.feedUrl.includes("reddit.com")));
+    
+    // Limit Reddit sources per fetch cycle
+    const redditToFetch = redditSources.slice(0, MAX_REDDIT_SOURCES_PER_FETCH);
+    
+    console.log(`Interval fetch: ${otherSources.length} non-Reddit + ${redditToFetch.length}/${redditSources.length} Reddit sources (randomized)`);
 
     // Track projects to check stop status (avoid repeated queries for same project)
     const projectStopStatus = new Map<string, boolean>();
@@ -191,7 +218,7 @@ export const fetchSourcesWithInterval = internalAction({
       return isStopping;
     };
 
-    // Fetch non-Reddit sources first
+    // Fetch non-Reddit sources first (shuffled order)
     for (let i = 0; i < otherSources.length; i++) {
       const source = otherSources[i];
       
@@ -201,7 +228,7 @@ export const fetchSourcesWithInterval = internalAction({
         continue;
       }
       
-      if (i > 0) await delayInternal(200); // Reduced for faster processing
+      if (i > 0) await delayInternal(200);
 
       fetchedCount++;
       const result = await ctx.runAction(internal.feeds.fetch.fetchSource, {
@@ -214,9 +241,9 @@ export const fetchSourcesWithInterval = internalAction({
       }
     }
 
-    // Fetch Reddit sources with longer delays (Reddit rate limits aggressively)
-    for (let i = 0; i < redditSources.length; i++) {
-      const source = redditSources[i];
+    // Fetch limited Reddit sources with longer delays
+    for (let i = 0; i < redditToFetch.length; i++) {
+      const source = redditToFetch[i];
       
       // Check if this project has requested stop
       if (await isProjectStopping(source.projectId)) {
@@ -315,11 +342,16 @@ export const triggerFetchProject = action({
       return project?.fetchStatus === "stopping";
     };
 
-    // Separate Reddit sources from others (Reddit needs longer delays)
-    const redditSources = projectSources.filter(s => s.feedUrl.includes("reddit.com"));
-    const otherSources = projectSources.filter(s => !s.feedUrl.includes("reddit.com"));
+    // Separate Reddit sources from others and shuffle for rotation
+    const redditSources = shuffleArray(projectSources.filter(s => s.feedUrl.includes("reddit.com")));
+    const otherSources = shuffleArray(projectSources.filter(s => !s.feedUrl.includes("reddit.com")));
+    
+    // Limit Reddit sources per fetch to avoid rate limiting
+    const redditToFetch = redditSources.slice(0, MAX_REDDIT_SOURCES_PER_FETCH);
+    
+    console.log(`Project fetch: ${otherSources.length} non-Reddit + ${redditToFetch.length}/${redditSources.length} Reddit sources (randomized)`);
 
-    // Fetch non-Reddit sources first (faster) - minimal delay for speed
+    // Fetch non-Reddit sources first (shuffled order)
     for (let i = 0; i < otherSources.length; i++) {
       // Check if stop was requested
       if (await shouldStop()) {
@@ -330,7 +362,7 @@ export const triggerFetchProject = action({
       const source = otherSources[i];
       
       if (i > 0) {
-        await delay(200); // Reduced to 200ms between non-Reddit sources for faster demo
+        await delay(200);
       }
 
       const result = await ctx.runAction(internal.feeds.fetch.fetchSource, {
@@ -345,18 +377,18 @@ export const triggerFetchProject = action({
       }
     }
 
-    // Fetch Reddit sources with longer delays (only if not stopped)
+    // Fetch limited Reddit sources with longer delays (only if not stopped)
     if (!stopped) {
-      for (let i = 0; i < redditSources.length; i++) {
+      for (let i = 0; i < redditToFetch.length; i++) {
         // Check if stop was requested
         if (await shouldStop()) {
           stopped = true;
           break;
         }
 
-        const source = redditSources[i];
+        const source = redditToFetch[i];
         
-        // 8-12 seconds between Reddit sources (Reddit rate limits aggressively from server IPs)
+        // 8-12 seconds between Reddit sources (Reddit rate limits aggressively)
         await delay(8000 + Math.random() * 4000);
 
         const result = await ctx.runAction(internal.feeds.fetch.fetchSource, {
