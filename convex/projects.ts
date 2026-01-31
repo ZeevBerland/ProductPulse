@@ -244,8 +244,13 @@ export const update = mutation({
     }
     
     const project = await ctx.db.get(args.id);
-    if (!project || project.userId !== userId) {
-      throw new Error("Project not found or access denied");
+    if (!project) {
+      throw new Error("Project not found");
+    }
+    
+    // Backward compatibility: allow access to projects without userId
+    if (project.userId && project.userId !== userId) {
+      throw new Error("Access denied");
     }
     
     const { id, ...updates } = args;
@@ -338,8 +343,13 @@ export const addSources = mutation({
     }
     
     const project = await ctx.db.get(args.projectId);
-    if (!project || project.userId !== userId) {
-      throw new Error("Project not found or access denied");
+    if (!project) {
+      throw new Error("Project not found");
+    }
+    
+    // Backward compatibility: allow access to projects without userId
+    if (project.userId && project.userId !== userId) {
+      throw new Error("Access denied");
     }
 
     const createdIds = [];
@@ -371,8 +381,13 @@ export const updateFetchInterval = mutation({
     }
     
     const project = await ctx.db.get(args.id);
-    if (!project || project.userId !== userId) {
-      throw new Error("Project not found or access denied");
+    if (!project) {
+      throw new Error("Project not found");
+    }
+    
+    // Backward compatibility: allow access to projects without userId
+    if (project.userId && project.userId !== userId) {
+      throw new Error("Access denied");
     }
     
     await ctx.db.patch(args.id, { fetchInterval: args.fetchInterval });
@@ -393,8 +408,13 @@ export const setFetchStatus = mutation({
     }
     
     const project = await ctx.db.get(args.id);
-    if (!project || project.userId !== userId) {
-      throw new Error("Project not found or access denied");
+    if (!project) {
+      throw new Error("Project not found");
+    }
+    
+    // Backward compatibility: allow access to projects without userId
+    if (project.userId && project.userId !== userId) {
+      throw new Error("Access denied");
     }
     
     await ctx.db.patch(args.id, { fetchStatus: args.status });
@@ -414,8 +434,13 @@ export const requestStopFetch = mutation({
     }
     
     const project = await ctx.db.get(args.id);
-    if (!project || project.userId !== userId) {
-      throw new Error("Project not found or access denied");
+    if (!project) {
+      throw new Error("Project not found");
+    }
+    
+    // Backward compatibility: allow access to projects without userId
+    if (project.userId && project.userId !== userId) {
+      throw new Error("Access denied");
     }
     
     // Only set to stopping if currently fetching
@@ -441,8 +466,13 @@ export const addCompetitor = mutation({
     }
     
     const project = await ctx.db.get(args.projectId);
-    if (!project || project.userId !== userId) {
-      throw new Error("Project not found or access denied");
+    if (!project) {
+      throw new Error("Project not found");
+    }
+    
+    // Backward compatibility: allow access to projects without userId
+    if (project.userId && project.userId !== userId) {
+      throw new Error("Access denied");
     }
 
     const competitors = project.competitors || [];
@@ -471,8 +501,13 @@ export const removeCompetitor = mutation({
     }
     
     const project = await ctx.db.get(args.projectId);
-    if (!project || project.userId !== userId) {
-      throw new Error("Project not found or access denied");
+    if (!project) {
+      throw new Error("Project not found");
+    }
+    
+    // Backward compatibility: allow access to projects without userId
+    if (project.userId && project.userId !== userId) {
+      throw new Error("Access denied");
     }
 
     const competitors = project.competitors || [];
@@ -499,8 +534,13 @@ export const setCompetitors = mutation({
     }
     
     const project = await ctx.db.get(args.projectId);
-    if (!project || project.userId !== userId) {
-      throw new Error("Project not found or access denied");
+    if (!project) {
+      throw new Error("Project not found");
+    }
+    
+    // Backward compatibility: allow access to projects without userId
+    if (project.userId && project.userId !== userId) {
+      throw new Error("Access denied");
     }
 
     await ctx.db.patch(args.projectId, {
@@ -521,8 +561,13 @@ export const remove = mutation({
     }
     
     const project = await ctx.db.get(args.id);
-    if (!project || project.userId !== userId) {
-      throw new Error("Project not found or access denied");
+    if (!project) {
+      throw new Error("Project not found");
+    }
+    
+    // Backward compatibility: allow access to projects without userId
+    if (project.userId && project.userId !== userId) {
+      throw new Error("Access denied");
     }
     
     // Delete all insights for this project
