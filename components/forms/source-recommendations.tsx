@@ -13,6 +13,9 @@ import {
   buildStackExchangeSource,
   buildDiscourseSource,
 } from "@/lib/source-templates";
+
+// Re-export SourceConfig for use by project-form
+export type { SourceConfig };
 import type { ProjectSuggestions } from "./ai-suggestions-panel";
 
 interface SourceRecommendationsProps {
