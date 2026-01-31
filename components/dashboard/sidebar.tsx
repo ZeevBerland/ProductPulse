@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -12,10 +13,19 @@ import {
   Bell,
   Settings,
   ChevronLeft,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { UserButton } from "@/components/auth/user-button";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface SidebarProps {
   projectId?: string;
@@ -23,6 +33,32 @@ interface SidebarProps {
 
 export function Sidebar({ projectId }: SidebarProps) {
   const pathname = usePathname();
+  const isMobile = useIsMobile();
+  
+  // Load collapsed state from localStorage
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("sidebar-collapsed");
+      return saved ? JSON.parse(saved) : isMobile;
+    }
+    return isMobile;
+  });
+
+  // Update collapsed state when mobile status changes
+  useEffect(() => {
+    if (isMobile && !isCollapsed) {
+      setIsCollapsed(true);
+    }
+  }, [isMobile, isCollapsed]);
+
+  // Save collapsed state to localStorage
+  const toggleCollapsed = () => {
+    const newState = !isCollapsed;
+    setIsCollapsed(newState);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("sidebar-collapsed", JSON.stringify(newState));
+    }
+  };
 
   const mainNavItems = [
     {
@@ -78,15 +114,37 @@ export function Sidebar({ projectId }: SidebarProps) {
     : [];
 
   return (
-    <div className="flex h-full w-64 flex-col border-r bg-background">
-      {/* Logo */}
-      <div className="flex h-16 items-center border-b px-6">
-        <Link href="/dashboard" className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-            <span className="text-primary-foreground font-bold text-lg">P</span>
-          </div>
-          <span className="font-bold text-xl">ProductPulse</span>
-        </Link>
+    <div className={cn(
+      "flex h-full flex-col border-r bg-background transition-all duration-300",
+      isCollapsed ? "w-16" : "w-64"
+    )}>
+      {/* Logo and Toggle */}
+      <div className="flex h-16 items-center border-b px-3 justify-between">
+        {!isCollapsed && (
+          <Link href="/dashboard" className="flex items-center gap-2">
+            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
+              <span className="text-primary-foreground font-bold text-lg">P</span>
+            </div>
+            <span className="font-bold text-xl">ProductPulse</span>
+          </Link>
+        )}
+        {isCollapsed && (
+          <Link href="/dashboard" className="flex items-center justify-center w-full">
+            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
+              <span className="text-primary-foreground font-bold text-lg">P</span>
+            </div>
+          </Link>
+        )}
+        {!isMobile && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleCollapsed}
+            className={cn("h-8 w-8 ml-auto", isCollapsed && "ml-0")}
+          >
+            {isCollapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
+          </Button>
+        )}
       </div>
 
       <ScrollArea className="flex-1 px-3 py-4">
@@ -94,10 +152,25 @@ export function Sidebar({ projectId }: SidebarProps) {
         {projectId && (
           <div className="mb-4">
             <Link href="/dashboard/projects">
-              <Button variant="ghost" size="sm" className="w-full justify-start">
-                <ChevronLeft className="mr-2 h-4 w-4" />
-                Back to Projects
-              </Button>
+              {isCollapsed ? (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button variant="ghost" size="icon" className="w-full">
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="right">
+                      <p>Back to Projects</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              ) : (
+                <Button variant="ghost" size="sm" className="w-full justify-start">
+                  <ChevronLeft className="mr-2 h-4 w-4" />
+                  Back to Projects
+                </Button>
+              )}
             </Link>
           </div>
         )}
@@ -105,21 +178,45 @@ export function Sidebar({ projectId }: SidebarProps) {
         {/* Main Navigation */}
         {!projectId && (
           <div className="space-y-1">
-            <p className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-              Navigation
-            </p>
+            {!isCollapsed && (
+              <p className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                Navigation
+              </p>
+            )}
             {mainNavItems.map((item) => (
               <Link key={item.href} href={item.href}>
-                <Button
-                  variant={pathname === item.href ? "secondary" : "ghost"}
-                  className={cn(
-                    "w-full justify-start",
-                    pathname === item.href && "bg-secondary"
-                  )}
-                >
-                  <item.icon className="mr-2 h-4 w-4" />
-                  {item.title}
-                </Button>
+                {isCollapsed ? (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant={pathname === item.href ? "secondary" : "ghost"}
+                          size="icon"
+                          className={cn(
+                            "w-full",
+                            pathname === item.href && "bg-secondary"
+                          )}
+                        >
+                          <item.icon className="h-5 w-5" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent side="right">
+                        <p>{item.title}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                ) : (
+                  <Button
+                    variant={pathname === item.href ? "secondary" : "ghost"}
+                    className={cn(
+                      "w-full justify-start",
+                      pathname === item.href && "bg-secondary"
+                    )}
+                  >
+                    <item.icon className="mr-2 h-4 w-4" />
+                    {item.title}
+                  </Button>
+                )}
               </Link>
             ))}
           </div>
@@ -128,21 +225,45 @@ export function Sidebar({ projectId }: SidebarProps) {
         {/* Project Navigation */}
         {projectId && (
           <div className="space-y-1">
-            <p className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-              Project
-            </p>
+            {!isCollapsed && (
+              <p className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                Project
+              </p>
+            )}
             {projectNavItems.map((item) => (
               <Link key={item.href} href={item.href}>
-                <Button
-                  variant={pathname === item.href ? "secondary" : "ghost"}
-                  className={cn(
-                    "w-full justify-start",
-                    pathname === item.href && "bg-secondary"
-                  )}
-                >
-                  <item.icon className="mr-2 h-4 w-4" />
-                  {item.title}
-                </Button>
+                {isCollapsed ? (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant={pathname === item.href ? "secondary" : "ghost"}
+                          size="icon"
+                          className={cn(
+                            "w-full",
+                            pathname === item.href && "bg-secondary"
+                          )}
+                        >
+                          <item.icon className="h-5 w-5" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent side="right">
+                        <p>{item.title}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                ) : (
+                  <Button
+                    variant={pathname === item.href ? "secondary" : "ghost"}
+                    className={cn(
+                      "w-full justify-start",
+                      pathname === item.href && "bg-secondary"
+                    )}
+                  >
+                    <item.icon className="mr-2 h-4 w-4" />
+                    {item.title}
+                  </Button>
+                )}
               </Link>
             ))}
           </div>
@@ -150,13 +271,19 @@ export function Sidebar({ projectId }: SidebarProps) {
       </ScrollArea>
 
       {/* Footer with User */}
-      <div className="border-t p-4">
-        <div className="flex items-center justify-between">
-          <p className="text-xs text-muted-foreground">
-            ProductPulse v1.0
-          </p>
-          <UserButton />
-        </div>
+      <div className="border-t p-3">
+        {isCollapsed ? (
+          <div className="flex justify-center">
+            <UserButton />
+          </div>
+        ) : (
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-muted-foreground">
+              ProductPulse v1.0
+            </p>
+            <UserButton />
+          </div>
+        )}
       </div>
     </div>
   );

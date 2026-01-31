@@ -19,17 +19,17 @@ export default function DashboardPage() {
     <div className="flex flex-col h-full w-full">
       <Header title="Dashboard" />
       
-      <div className="flex-1 p-6 space-y-6 overflow-auto">
+      <div className="flex-1 p-4 md:p-6 space-y-4 md:space-y-6 overflow-auto">
         {/* Welcome Section */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">Welcome back!</h2>
-            <p className="text-muted-foreground">
+            <h2 className="text-xl md:text-2xl font-bold tracking-tight">Welcome back!</h2>
+            <p className="text-sm text-muted-foreground">
               Here&apos;s an overview of your product feedback intelligence.
             </p>
           </div>
-          <Link href="/dashboard/projects/new">
-            <Button>
+          <Link href="/dashboard/projects/new" className="w-full sm:w-auto">
+            <Button className="w-full sm:w-auto">
               <Plus className="mr-2 h-4 w-4" />
               New Project
             </Button>
@@ -37,17 +37,17 @@ export default function DashboardPage() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 md:p-6">
               <CardTitle className="text-sm font-medium">Total Projects</CardTitle>
               <FolderKanban className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4 md:p-6 pt-0">
               {projects === undefined ? (
                 <Skeleton className="h-8 w-16" />
               ) : (
-                <div className="text-2xl font-bold">{totalProjects}</div>
+                <div className="text-2xl md:text-3xl font-bold">{totalProjects}</div>
               )}
               <p className="text-xs text-muted-foreground">
                 Tracking product feedback
@@ -56,15 +56,15 @@ export default function DashboardPage() {
           </Card>
 
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 md:p-6">
               <CardTitle className="text-sm font-medium">Active Sources</CardTitle>
               <Rss className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4 md:p-6 pt-0">
               {dashboardStats === undefined ? (
                 <Skeleton className="h-8 w-16" />
               ) : (
-                <div className="text-2xl font-bold">{dashboardStats.activeSources}</div>
+                <div className="text-2xl md:text-3xl font-bold">{dashboardStats.activeSources}</div>
               )}
               <p className="text-xs text-muted-foreground">
                 RSS feeds being monitored

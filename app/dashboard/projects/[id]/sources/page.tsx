@@ -80,16 +80,16 @@ export default function SourcesPage({
     <div className="flex flex-col h-full w-full">
       <Header title="Sources" />
 
-      <div className="flex-1 p-6 space-y-6 overflow-auto">
+      <div className="flex-1 p-4 md:p-6 space-y-4 md:space-y-6 overflow-auto">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight">RSS Sources</h2>
-            <p className="text-muted-foreground">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0">
+          <div className="min-w-0 flex-1">
+            <h2 className="text-xl md:text-2xl font-bold tracking-tight">RSS Sources</h2>
+            <p className="text-sm text-muted-foreground">
               Configure RSS feeds to monitor for {project?.name || "this project"}.
             </p>
           </div>
-          <Button onClick={() => setAddDialogOpen(true)}>
+          <Button onClick={() => setAddDialogOpen(true)} className="w-full sm:w-auto flex-shrink-0">
             <Plus className="mr-2 h-4 w-4" />
             Add Source
           </Button>
@@ -98,21 +98,21 @@ export default function SourcesPage({
         {/* Sources Grid */}
         {sources.length === 0 ? (
           <Card>
-            <CardContent className="flex flex-col items-center justify-center py-16">
-              <Rss className="h-16 w-16 text-muted-foreground mb-4" />
-              <h3 className="text-xl font-semibold mb-2">No sources configured</h3>
-              <p className="text-muted-foreground text-center mb-6 max-w-sm">
+            <CardContent className="flex flex-col items-center justify-center py-12 md:py-16 p-4 md:p-6">
+              <Rss className="h-12 w-12 md:h-16 md:w-16 text-muted-foreground mb-4" />
+              <h3 className="text-lg md:text-xl font-semibold mb-2">No sources configured</h3>
+              <p className="text-sm text-muted-foreground text-center mb-6 max-w-sm">
                 Add RSS sources from Reddit, Hacker News, Stack Exchange, or any
                 custom feed to start monitoring product feedback.
               </p>
-              <Button size="lg" onClick={() => setAddDialogOpen(true)}>
+              <Button size="lg" onClick={() => setAddDialogOpen(true)} className="w-full sm:w-auto">
                 <Plus className="mr-2 h-4 w-4" />
                 Add Your First Source
               </Button>
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {sources.map((source) => (
               <SourceCard
                 key={source._id}

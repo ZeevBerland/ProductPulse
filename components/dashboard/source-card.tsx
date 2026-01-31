@@ -60,16 +60,16 @@ export function SourceCard({ source, onDelete, onFetch }: SourceCardProps) {
   };
 
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
-          <div className="space-y-1">
-            <CardTitle className="text-base font-medium">{source.name}</CardTitle>
+    <Card className="flex flex-col">
+      <CardHeader className="pb-3 p-4 md:p-6">
+        <div className="flex items-start justify-between gap-3">
+          <div className="space-y-1 flex-1 min-w-0">
+            <CardTitle className="text-base font-medium truncate">{source.name}</CardTitle>
             <Badge className={sourceTypeColors[source.type]} variant="secondary">
               {source.type}
             </Badge>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-shrink-0">
             <Switch
               checked={source.active}
               onCheckedChange={handleToggle}
@@ -110,17 +110,19 @@ export function SourceCard({ source, onDelete, onFetch }: SourceCardProps) {
           </div>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-4 md:p-6 pt-0">
         <div className="space-y-2">
-          <div className="text-xs text-muted-foreground truncate" title={source.feedUrl}>
+          <div className="text-xs text-muted-foreground truncate break-all" title={source.feedUrl}>
             {source.feedUrl}
           </div>
           <div className="flex items-center gap-4 text-xs text-muted-foreground">
             <div className="flex items-center gap-1">
-              <Clock className="h-3 w-3" />
-              {source.lastFetched
-                ? `Last fetched ${formatDistanceToNow(source.lastFetched, { addSuffix: true })}`
-                : "Never fetched"}
+              <Clock className="h-3 w-3 flex-shrink-0" />
+              <span className="truncate">
+                {source.lastFetched
+                  ? `Last fetched ${formatDistanceToNow(source.lastFetched, { addSuffix: true })}`
+                  : "Never fetched"}
+              </span>
             </div>
           </div>
         </div>

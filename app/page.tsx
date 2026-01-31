@@ -14,25 +14,25 @@ export default function Home() {
       <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-lg">P</span>
+            <div className="h-6 w-6 md:h-8 md:w-8 rounded-lg bg-primary flex items-center justify-center">
+              <span className="text-primary-foreground font-bold text-base md:text-lg">P</span>
             </div>
-            <span className="font-bold text-xl">ProductPulse</span>
+            <span className="font-bold text-lg md:text-xl">ProductPulse</span>
           </div>
-          <nav className="flex items-center gap-4">
+          <nav className="flex items-center gap-2 sm:gap-4">
             {isLoading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : isAuthenticated ? (
               <Link href="/dashboard">
-                <Button>Go to Dashboard</Button>
+                <Button className="text-sm">Go to Dashboard</Button>
               </Link>
             ) : (
               <>
                 <Link href="/login">
-                  <Button variant="ghost">Sign In</Button>
+                  <Button variant="ghost" className="text-sm">Sign In</Button>
                 </Link>
                 <Link href="/signup">
-                  <Button>Get Started</Button>
+                  <Button className="text-sm">Get Started</Button>
                 </Link>
               </>
             )}
@@ -41,30 +41,30 @@ export default function Home() {
       </header>
 
       {/* Hero Section */}
-      <main className="container mx-auto px-4 py-24">
+      <main className="container mx-auto px-4 py-12 md:py-24">
         <div className="flex flex-col items-center text-center max-w-3xl mx-auto">
-          <div className="inline-flex items-center rounded-full border px-3 py-1 text-sm mb-6">
+          <div className="inline-flex items-center rounded-full border px-3 py-1 text-xs md:text-sm mb-4 md:mb-6">
             <span className="text-muted-foreground">
               Track the Voice of the Product — Everywhere
             </span>
           </div>
-          <h1 className="text-4xl font-bold tracking-tight sm:text-6xl mb-6">
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight md:text-6xl mb-4 md:mb-6">
             AI-Powered Feedback Intelligence for{" "}
             <span className="text-primary">Product Teams</span>
           </h1>
-          <p className="text-lg text-muted-foreground mb-8 max-w-2xl">
+          <p className="text-base md:text-lg text-muted-foreground mb-6 md:mb-8 max-w-2xl">
             ProductPulse continuously monitors public product conversations from
             Reddit, Hacker News, Stack Exchange, and more. Extract actionable
             insights, track sentiment trends, and discover feature opportunities.
           </p>
-          <div className="flex gap-4">
-            <Link href={isAuthenticated ? "/dashboard" : "/signup"}>
-              <Button size="lg" className="px-8">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto">
+            <Link href={isAuthenticated ? "/dashboard" : "/signup"} className="w-full sm:w-auto">
+              <Button size="lg" className="px-8 w-full sm:w-auto">
                 {isAuthenticated ? "Go to Dashboard" : "Get Started Free"}
               </Button>
             </Link>
-            <Link href="#features">
-              <Button variant="outline" size="lg" className="px-8">
+            <Link href="#features" className="w-full sm:w-auto">
+              <Button variant="outline" size="lg" className="px-8 w-full sm:w-auto">
                 Learn More
               </Button>
             </Link>
@@ -72,20 +72,20 @@ export default function Home() {
         </div>
 
         {/* Features Section */}
-        <section id="features" className="py-24">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold tracking-tight mb-4">
+        <section id="features" className="py-16 md:py-24">
+          <div className="text-center mb-12 md:mb-16">
+            <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-4">
               Everything you need to understand your users
             </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-sm md:text-base text-muted-foreground max-w-2xl mx-auto">
               No scraping, no APIs to manage. Just connect RSS feeds and let AI
               do the heavy lifting.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
             {/* Feature 1 */}
-            <div className="rounded-lg border bg-card p-6">
+            <div className="rounded-lg border bg-card p-4 md:p-6">
               <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -110,7 +110,7 @@ export default function Home() {
             </div>
 
             {/* Feature 2 */}
-            <div className="rounded-lg border bg-card p-6">
+            <div className="rounded-lg border bg-card p-4 md:p-6">
               <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -135,7 +135,7 @@ export default function Home() {
             </div>
 
             {/* Feature 3 */}
-            <div className="rounded-lg border bg-card p-6">
+            <div className="rounded-lg border bg-card p-4 md:p-6">
               <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"

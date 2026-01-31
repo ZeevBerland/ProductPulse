@@ -25,7 +25,7 @@ export function StatsCards({ projectId, daysBack = 30 }: StatsCardsProps) {
 
   if (stats === undefined) {
     return (
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <Skeleton className="h-32" />
         <Skeleton className="h-32" />
         <Skeleton className="h-32" />
@@ -42,15 +42,15 @@ export function StatsCards({ projectId, daysBack = 30 }: StatsCardsProps) {
       : { icon: null, color: "text-gray-500", label: "Neutral" };
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
       {/* Total Insights */}
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 md:p-6">
           <CardTitle className="text-sm font-medium">Total Insights</CardTitle>
           <Lightbulb className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{stats.totalInsights}</div>
+        <CardContent className="p-4 md:p-6 pt-0">
+          <div className="text-2xl md:text-3xl font-bold">{stats.totalInsights}</div>
           <p className="text-xs text-muted-foreground">
             Last {daysBack} days
           </p>
@@ -59,14 +59,14 @@ export function StatsCards({ projectId, daysBack = 30 }: StatsCardsProps) {
 
       {/* Average Sentiment */}
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 md:p-6">
           <CardTitle className="text-sm font-medium">Avg. Sentiment</CardTitle>
           {sentimentTrend.icon && (
             <sentimentTrend.icon className={`h-4 w-4 ${sentimentTrend.color}`} />
           )}
         </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">
+        <CardContent className="p-4 md:p-6 pt-0">
+          <div className="text-2xl md:text-3xl font-bold">
             {stats.totalInsights > 0 ? stats.avgSentiment.toFixed(2) : "-"}
           </div>
           <p className={`text-xs ${sentimentTrend.color}`}>
@@ -77,12 +77,12 @@ export function StatsCards({ projectId, daysBack = 30 }: StatsCardsProps) {
 
       {/* High Actionability */}
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 md:p-6">
           <CardTitle className="text-sm font-medium">High Priority</CardTitle>
           <AlertTriangle className="h-4 w-4 text-orange-500" />
         </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{stats.highActionability}</div>
+        <CardContent className="p-4 md:p-6 pt-0">
+          <div className="text-2xl md:text-3xl font-bold">{stats.highActionability}</div>
           <p className="text-xs text-muted-foreground">
             Items needing attention
           </p>
@@ -91,11 +91,11 @@ export function StatsCards({ projectId, daysBack = 30 }: StatsCardsProps) {
 
       {/* Sentiment Breakdown */}
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 md:p-6">
           <CardTitle className="text-sm font-medium">Sentiment Split</CardTitle>
           <MessageSquare className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4 md:p-6 pt-0">
           <div className="flex gap-2 text-sm font-medium">
             <span className="text-green-600">+{stats.sentimentCounts.positive}</span>
             <span className="text-gray-500">{stats.sentimentCounts.neutral}</span>
