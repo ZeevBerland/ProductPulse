@@ -26,7 +26,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Id } from "@/convex/_generated/dataModel";
-import { RefreshCw, Clock, Loader2, CheckCircle, AlertTriangle, Square } from "lucide-react";
+import { RefreshCw, Clock, Loader2, CheckCircle, AlertTriangle, Square, Trash2 } from "lucide-react";
 
 interface FetchSettingsCardProps {
   projectId: Id<"projects">;
@@ -45,13 +45,16 @@ export function FetchSettingsCard({ projectId, currentInterval = 360 }: FetchSet
   const [isFetching, setIsFetching] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isStopping, setIsStopping] = useState(false);
+  const [isCleaning, setIsCleaning] = useState(false);
   const [fetchResult, setFetchResult] = useState<{ success: boolean; itemsAdded: number; stopped?: boolean } | null>(null);
+  const [cleanupResult, setCleanupResult] = useState<{ deletedFeedItems: number; deletedInsights: number } | null>(null);
   const [showWarningDialog, setShowWarningDialog] = useState(false);
   const [fetchStartTime, setFetchStartTime] = useState<number | null>(null);
 
   const updateFetchInterval = useMutation(api.projects.updateFetchInterval);
   const triggerFetchProject = useAction(api.feeds.fetch.triggerFetchProject);
   const requestStopFetch = useMutation(api.projects.requestStopFetch);
+  const cleanupOldItems = useMutation(api.feedItems.cleanupOldItems);
 
   // Get project to check fetch status
   const project = useQuery(api.projects.get, { id: projectId });
@@ -161,6 +164,27 @@ export function FetchSettingsCard({ projectId, currentInterval = 360 }: FetchSet
         variant: "destructive",
       });
       setIsStopping(false);
+    }
+  };
+
+  const handleCleanup = async () => {
+    setIsCleaning(true);
+    setCleanupResult(null);
+    try {
+      const result = await cleanupOldItems({ projectId, maxAgeDays: 30 });
+      setCleanupResult(result);
+      toast({
+        title: "Cleanup complete",
+        description: `Removed ${result.deletedFeedItems} old feed items and ${result.deletedInsights} old insights.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Cleanup failed",
+        description: "An error occurred during cleanup.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsCleaning(false);
     }
   };
 
@@ -307,6 +331,40 @@ export function FetchSettingsCard({ projectId, currentInterval = 360 }: FetchSet
             No sources configured. Add sources to start fetching feeds.
           </p>
         )}
+
+        {/* Cleanup Section */}
+        <div className="space-y-2 pt-2 border-t">
+          <div className="flex items-center justify-between">
+            <div>
+              <Label className="text-sm">Clean Up Old Data</Label>
+              <p className="text-xs text-muted-foreground">
+                Remove feed items and insights older than 30 days
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleCleanup}
+              disabled={isCleaning}
+              className="gap-2"
+            >
+              {isCleaning ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Trash2 className="h-4 w-4" />
+              )}
+              {isCleaning ? "Cleaning..." : "Clean Up"}
+            </Button>
+          </div>
+          {cleanupResult && (
+            <div className="flex items-center gap-2 p-2 rounded-md bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300">
+              <CheckCircle className="h-4 w-4" />
+              <span className="text-sm">
+                Removed {cleanupResult.deletedFeedItems} feed items and {cleanupResult.deletedInsights} insights
+              </span>
+            </div>
+          )}
+        </div>
 
         {/* In Progress Warning */}
         {(isFetching || isServerFetching) && (

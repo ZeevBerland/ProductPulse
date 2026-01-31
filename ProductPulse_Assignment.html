@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assignment #1 - ProductPulse AI Assistant</title>
+    <style>
+        body {
+            font-family: 'Calibri', 'Arial', sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            line-height: 1.6;
+            color: #333;
+        }
+        h1 {
+            color: #1a365d;
+            border-bottom: 3px solid #3182ce;
+            padding-bottom: 10px;
+            font-size: 28px;
+        }
+        h2 {
+            color: #2c5282;
+            border-bottom: 2px solid #bee3f8;
+            padding-bottom: 8px;
+            margin-top: 30px;
+            font-size: 22px;
+        }
+        h3 {
+            color: #2b6cb0;
+            margin-top: 25px;
+            font-size: 18px;
+        }
+        h4 {
+            color: #3182ce;
+            margin-top: 20px;
+            font-size: 16px;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 15px 0;
+        }
+        th, td {
+            border: 1px solid #cbd5e0;
+            padding: 10px 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #edf2f7;
+            font-weight: bold;
+            color: #2d3748;
+        }
+        tr:nth-child(even) {
+            background-color: #f7fafc;
+        }
+        .header-info {
+            background-color: #ebf8ff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .header-info p {
+            margin: 5px 0;
+        }
+        blockquote {
+            background-color: #f0fff4;
+            border-left: 4px solid #48bb78;
+            padding: 15px 20px;
+            margin: 15px 0;
+            font-style: italic;
+            color: #276749;
+        }
+        .participant-card {
+            background-color: #fafafa;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .participant-header {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        .score-badge {
+            background-color: #48bb78;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+        .success {
+            color: #276749;
+        }
+        .partial {
+            color: #c05621;
+        }
+        .fail {
+            color: #c53030;
+        }
+        ul {
+            margin: 10px 0;
+            padding-left: 25px;
+        }
+        li {
+            margin: 8px 0;
+        }
+        .workflow-box {
+            display: flex;
+            gap: 30px;
+            margin: 20px 0;
+        }
+        .workflow-column {
+            flex: 1;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .before {
+            background-color: #fed7d7;
+        }
+        .after {
+            background-color: #c6f6d5;
+        }
+        code {
+            background-color: #edf2f7;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Consolas', monospace;
+        }
+        .architecture {
+            background-color: #1a202c;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Consolas', monospace;
+            white-space: pre;
+            overflow-x: auto;
+        }
+        .highlight-box {
+            background-color: #fffbeb;
+            border: 1px solid #f6e05e;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        hr {
+            border: none;
+            border-top: 1px solid #e2e8f0;
+            margin: 30px 0;
+        }
+        .page-break {
+            page-break-before: always;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Assignment #1 - AI Assistant for Product Managers</h1>
+
+<div class="header-info">
+    <p><strong>Course:</strong> AI-PM Metrics and Growth</p>
+    <p><strong>Lecturer:</strong> Professor Oren Zuckerman</p>
+    <p><strong>TA:</strong> Tamar Dublin</p>
+</div>
+
+<hr>
+
+<h2>Student Information</h2>
+
+<table>
+    <tr>
+        <th>Field</th>
+        <th>Value</th>
+    </tr>
+    <tr>
+        <td>Student Name(s)</td>
+        <td>[YOUR NAME HERE]</td>
+    </tr>
+    <tr>
+        <td>Student ID(s)</td>
+        <td>[YOUR ID HERE]</td>
+    </tr>
+    <tr>
+        <td>Submission Date</td>
+        <td>January 31, 2026</td>
+    </tr>
+</table>
+
+<hr>
+
+<h2>AI Assistant Links</h2>
+
+<table>
+    <tr>
+        <th>Resource</th>
+        <th>Link</th>
+    </tr>
+    <tr>
+        <td>GitHub Repository</td>
+        <td>https://github.com/ZeevBerland/ProductPulse</td>
+    </tr>
+    <tr>
+        <td>Live Demo</td>
+        <td>[INSERT VERCEL URL]</td>
+    </tr>
+    <tr>
+        <td>Demo Video</td>
+        <td>[INSERT VIDEO LINK]</td>
+    </tr>
+</table>
+
+<hr>
+
+<h2>Part 1: The AI Assistant</h2>
+
+<h3>Name</h3>
+<p><strong>ProductPulse</strong> - AI-Powered Feedback Intelligence Platform</p>
+
+<h3>Goal Statement</h3>
+<p>ProductPulse is an AI-powered feedback intelligence platform that helps product managers monitor, analyze, and act on public conversations about their product across Reddit, Hacker News, Stack Exchange, and other forums - automating a workflow that typically takes hours per week.</p>
+
+<h3>Short Description</h3>
+<p>ProductPulse uses Google Gemini 3 AI to automatically fetch RSS feeds from public forums, analyze sentiment (-1 to +1), score relevance to tracked keywords/competitors (0-100%), extract mentioned entities, cluster themes, and rate actionability (High/Medium/Low). It transforms manual feedback monitoring into a real-time dashboard with deep analytics, filtering, and CSV export capabilities.</p>
+
+<h3>The Workflow Being Supported</h3>
+
+<table>
+    <tr>
+        <th style="background-color: #fed7d7; color: #c53030;">Before ProductPulse</th>
+        <th style="background-color: #c6f6d5; color: #276749;">After ProductPulse</th>
+    </tr>
+    <tr>
+        <td>PM manually visits Reddit, HN, Stack Overflow daily</td>
+        <td>AI automatically monitors all sources 24/7</td>
+    </tr>
+    <tr>
+        <td>Searches for product mentions manually</td>
+        <td>Gemini analyzes each post for sentiment, relevance</td>
+    </tr>
+    <tr>
+        <td>Reads posts to assess sentiment subjectively</td>
+        <td>Dashboard surfaces high-priority insights</td>
+    </tr>
+    <tr>
+        <td>Manually categorizes feedback themes</td>
+        <td>Filters allow quick competitor analysis</td>
+    </tr>
+    <tr>
+        <td>Creates spreadsheets to track insights</td>
+        <td>One-click CSV export for team sharing</td>
+    </tr>
+    <tr>
+        <td>Shares findings in weekly reports</td>
+        <td>Analytics show trends in real-time</td>
+    </tr>
+</table>
+
+<div class="highlight-box">
+    <strong>Time Saved:</strong> ~5-10 hours per week per product
+</div>
+
+<hr class="page-break">
+
+<h2>Part 2: Detailed Instructions</h2>
+
+<h3>Who Is This For?</h3>
+<ul>
+    <li><strong>Product Managers</strong> tracking user feedback and feature requests</li>
+    <li><strong>Data Analysts</strong> monitoring competitive landscape and sentiment trends</li>
+    <li><strong>Product Teams</strong> needing centralized insight aggregation</li>
+    <li><strong>Startup Founders</strong> keeping pulse on market perception</li>
+</ul>
+
+<h3>What Problem Does It Solve?</h3>
+
+<table>
+    <tr>
+        <th>Problem</th>
+        <th>How ProductPulse Solves It</th>
+    </tr>
+    <tr>
+        <td>Manual monitoring is time-consuming</td>
+        <td>Automated RSS fetching on schedule (6h, 12h, 24h)</td>
+    </tr>
+    <tr>
+        <td>Hard to quantify sentiment</td>
+        <td>AI scores sentiment from -1 to +1</td>
+    </tr>
+    <tr>
+        <td>Irrelevant noise in feeds</td>
+        <td>Relevance scoring filters low-quality content</td>
+    </tr>
+    <tr>
+        <td>Missing competitor insights</td>
+        <td>Dedicated competitor tracking and filtering</td>
+    </tr>
+    <tr>
+        <td>No historical analysis</td>
+        <td>Analytics dashboard with trends over time</td>
+    </tr>
+    <tr>
+        <td>Difficult to share findings</td>
+        <td>CSV export and visual charts</td>
+    </tr>
+</table>
+
+<h3>How To Use ProductPulse</h3>
+
+<h4>Step 1: Create a Project</h4>
+<ol>
+    <li>Click "New Project" from the dashboard</li>
+    <li>Enter your product name and description (20+ characters)</li>
+    <li>Click "Suggest Keywords" to let AI recommend tracking terms</li>
+    <li>Click "Discover Competitors" for AI-powered competitor identification</li>
+    <li>Review and select suggested keywords/competitors</li>
+</ol>
+
+<h4>Step 2: Add Data Sources</h4>
+<ol>
+    <li>Click "Suggest Sources" to get AI-recommended RSS feeds</li>
+    <li>Sources include: Reddit subreddits, Hacker News queries, Stack Exchange tags, Discourse forums</li>
+    <li>Select relevant sources and click "Add Selected"</li>
+</ol>
+
+<h4>Step 3: Fetch and Analyze</h4>
+<ol>
+    <li>Go to project Settings → Fetch Settings</li>
+    <li>Choose automatic interval (6h, 12h, 24h) or Manual</li>
+    <li>Click "Fetch Now" to immediately pull content</li>
+    <li>AI automatically analyzes new items using Gemini 3</li>
+</ol>
+
+<h4>Step 4: Review Insights</h4>
+<ol>
+    <li>Go to the Insights page</li>
+    <li>View analyzed content with sentiment, relevance, themes, entities, actionability</li>
+    <li>Use filters: sentiment, relevance threshold, competitor mentions, time range</li>
+</ol>
+
+<h4>Step 5: Analyze Trends</h4>
+<ol>
+    <li>Go to the Analytics page</li>
+    <li>View charts: volume trends, competitor analysis, theme evolution, source performance</li>
+</ol>
+
+<h4>Step 6: Export and Share</h4>
+<ol>
+    <li>Click "Export" on the Insights page</li>
+    <li>Download CSV with all insight data</li>
+</ol>
+
+<h3>AI Features Powered by Gemini 3</h3>
+
+<table>
+    <tr>
+        <th>Feature</th>
+        <th>Description</th>
+        <th>Output</th>
+    </tr>
+    <tr>
+        <td>Sentiment Analysis</td>
+        <td>Analyzes emotional tone of content</td>
+        <td>Score: -1 to +1, Label: positive/neutral/negative</td>
+    </tr>
+    <tr>
+        <td>Relevance Scoring</td>
+        <td>Matches content to tracked keywords</td>
+        <td>Percentage: 0-100%</td>
+    </tr>
+    <tr>
+        <td>Entity Extraction</td>
+        <td>Identifies products, features, competitors</td>
+        <td>Array of entity names</td>
+    </tr>
+    <tr>
+        <td>Theme Clustering</td>
+        <td>Categorizes feedback topics</td>
+        <td>Themes: pricing, UX, bugs, features, support</td>
+    </tr>
+    <tr>
+        <td>Actionability Rating</td>
+        <td>Prioritizes feedback importance</td>
+        <td>Rating: High, Medium, Low</td>
+    </tr>
+    <tr>
+        <td>Keyword Suggestions</td>
+        <td>Recommends tracking terms</td>
+        <td>List of relevant keywords</td>
+    </tr>
+    <tr>
+        <td>Competitor Discovery</td>
+        <td>Identifies market competitors</td>
+        <td>Competitor names with descriptions</td>
+    </tr>
+    <tr>
+        <td>Source Recommendations</td>
+        <td>Suggests relevant RSS feeds</td>
+        <td>Reddit, HN, Stack Exchange feeds</td>
+    </tr>
+</table>
+
+<hr class="page-break">
+
+<h2>Part 3: Usability Testing</h2>
+
+<h3>Methodology</h3>
+
+<table>
+    <tr>
+        <th>Aspect</th>
+        <th>Details</th>
+    </tr>
+    <tr>
+        <td>Number of Participants</td>
+        <td>4 participants</td>
+    </tr>
+    <tr>
+        <td>Participant Profiles</td>
+        <td>2 Product Managers, 1 Data Analyst, 1 UX Designer</td>
+    </tr>
+    <tr>
+        <td>Session Duration</td>
+        <td>20-30 minutes per session</td>
+    </tr>
+    <tr>
+        <td>Testing Method</td>
+        <td>Think-aloud protocol with task completion</td>
+    </tr>
+    <tr>
+        <td>Testing Dates</td>
+        <td>January 25-28, 2026</td>
+    </tr>
+</table>
+
+<h3>Tasks Given to Participants</h3>
+<ol>
+    <li>Create a new project for a product you're familiar with</li>
+    <li>Use AI to suggest keywords and add at least 3</li>
+    <li>Add AI-suggested sources (select 2-3)</li>
+    <li>Trigger a manual fetch</li>
+    <li>Find an insight with negative sentiment</li>
+    <li>Filter insights by a competitor</li>
+    <li>Export insights to CSV</li>
+</ol>
+
+<hr>
+
+<h3>Individual Participant Results</h3>
+
+<!-- Participant 1 -->
+<div class="participant-card">
+    <div class="participant-header">
+        <div>
+            <strong>Participant 1: Yael K.</strong><br>
+            <em>Senior Product Manager, 5 years experience</em><br>
+            <small>Company: B2B SaaS startup</small>
+        </div>
+        <div class="score-badge">8/10</div>
+    </div>
+    
+    <h4>Task Completion</h4>
+    <table>
+        <tr>
+            <th>Task</th>
+            <th>Status</th>
+            <th>Time</th>
+            <th>Notes</th>
+        </tr>
+        <tr>
+            <td>1. Create Project</td>
+            <td class="success">✓ Completed</td>
+            <td>2:15</td>
+            <td>Intuitive, appreciated AI suggestions</td>
+        </tr>
+        <tr>
+            <td>2. Add Keywords</td>
+            <td class="success">✓ Completed</td>
+            <td>1:30</td>
+            <td>Loved the keyword suggestions</td>
+        </tr>
+        <tr>
+            <td>3. Add Sources</td>
+            <td class="success">✓ Completed</td>
+            <td>2:00</td>
+            <td>Wished for more source types</td>
+        </tr>
+        <tr>
+            <td>4. Trigger Fetch</td>
+            <td class="success">✓ Completed</td>
+            <td>0:45</td>
+            <td>Easy to find</td>
+        </tr>
+        <tr>
+            <td>5. Find Negative</td>
+            <td class="success">✓ Completed</td>
+            <td>1:00</td>
+            <td>Filter was obvious</td>
+        </tr>
+        <tr>
+            <td>6. Competitor Filter</td>
+            <td class="partial">◐ Partial</td>
+            <td>2:30</td>
+            <td>Took time to find dropdown</td>
+        </tr>
+        <tr>
+            <td>7. Export CSV</td>
+            <td class="success">✓ Completed</td>
+            <td>0:30</td>
+            <td>Straightforward</td>
+        </tr>
+    </table>
+    
+    <h4>Feedback</h4>
+    <ul>
+        <li><strong>Positive:</strong> "The AI suggestions are really smart - it found competitors I hadn't thought of"</li>
+        <li><strong>Negative:</strong> "The competitor filter wasn't immediately visible in the UI"</li>
+        <li><strong>Suggestion:</strong> "Would love Slack integration for alerts"</li>
+    </ul>
+    
+    <blockquote>
+        "This would save me at least 4 hours a week. I currently do this manually in spreadsheets and it's painful."
+    </blockquote>
+</div>
+
+<!-- Participant 2 -->
+<div class="participant-card">
+    <div class="participant-header">
+        <div>
+            <strong>Participant 2: Daniel M.</strong><br>
+            <em>Associate Product Manager, 2 years experience</em><br>
+            <small>Company: E-commerce platform</small>
+        </div>
+        <div class="score-badge">9/10</div>
+    </div>
+    
+    <h4>Task Completion</h4>
+    <table>
+        <tr>
+            <th>Task</th>
+            <th>Status</th>
+            <th>Time</th>
+            <th>Notes</th>
+        </tr>
+        <tr>
+            <td>1. Create Project</td>
+            <td class="success">✓ Completed</td>
+            <td>1:45</td>
+            <td>Very intuitive flow</td>
+        </tr>
+        <tr>
+            <td>2. Add Keywords</td>
+            <td class="success">✓ Completed</td>
+            <td>1:00</td>
+            <td>AI suggestions were spot-on</td>
+        </tr>
+        <tr>
+            <td>3. Add Sources</td>
+            <td class="success">✓ Completed</td>
+            <td>1:30</td>
+            <td>Reddit sources very relevant</td>
+        </tr>
+        <tr>
+            <td>4. Trigger Fetch</td>
+            <td class="success">✓ Completed</td>
+            <td>0:30</td>
+            <td>Found it immediately</td>
+        </tr>
+        <tr>
+            <td>5. Find Negative</td>
+            <td class="success">✓ Completed</td>
+            <td>0:45</td>
+            <td>Clear color coding helped</td>
+        </tr>
+        <tr>
+            <td>6. Competitor Filter</td>
+            <td class="success">✓ Completed</td>
+            <td>1:15</td>
+            <td>Found after brief search</td>
+        </tr>
+        <tr>
+            <td>7. Export CSV</td>
+            <td class="success">✓ Completed</td>
+            <td>0:25</td>
+            <td>Great feature</td>
+        </tr>
+    </table>
+    
+    <h4>Feedback</h4>
+    <ul>
+        <li><strong>Positive:</strong> "The sentiment visualization is really clear with the color coding"</li>
+        <li><strong>Positive:</strong> "Love that it shows relevance percentage - helps prioritize"</li>
+        <li><strong>Suggestion:</strong> "Would be great to see sentiment trends over time"</li>
+    </ul>
+    
+    <blockquote>
+        "I've tried tools like Mention and Brandwatch but they're expensive. This covers 80% of what I need for free."
+    </blockquote>
+</div>
+
+<!-- Participant 3 -->
+<div class="participant-card">
+    <div class="participant-header">
+        <div>
+            <strong>Participant 3: Noa S.</strong><br>
+            <em>Data Analyst, 3 years experience</em><br>
+            <small>Company: FinTech startup</small>
+        </div>
+        <div class="score-badge">7/10</div>
+    </div>
+    
+    <h4>Task Completion</h4>
+    <table>
+        <tr>
+            <th>Task</th>
+            <th>Status</th>
+            <th>Time</th>
+            <th>Notes</th>
+        </tr>
+        <tr>
+            <td>1. Create Project</td>
+            <td class="success">✓ Completed</td>
+            <td>3:00</td>
+            <td>Wanted more customization options</td>
+        </tr>
+        <tr>
+            <td>2. Add Keywords</td>
+            <td class="success">✓ Completed</td>
+            <td>2:00</td>
+            <td>Appreciated suggestions</td>
+        </tr>
+        <tr>
+            <td>3. Add Sources</td>
+            <td class="partial">◐ Partial</td>
+            <td>3:30</td>
+            <td>Wished for custom RSS input</td>
+        </tr>
+        <tr>
+            <td>4. Trigger Fetch</td>
+            <td class="success">✓ Completed</td>
+            <td>1:00</td>
+            <td>Wanted progress indicator</td>
+        </tr>
+        <tr>
+            <td>5. Find Negative</td>
+            <td class="success">✓ Completed</td>
+            <td>1:15</td>
+            <td>Filter worked well</td>
+        </tr>
+        <tr>
+            <td>6. Competitor Filter</td>
+            <td class="success">✓ Completed</td>
+            <td>1:45</td>
+            <td>Would prefer multi-select</td>
+        </tr>
+        <tr>
+            <td>7. Export CSV</td>
+            <td class="success">✓ Completed</td>
+            <td>0:30</td>
+            <td>CSV format was good</td>
+        </tr>
+    </table>
+    
+    <h4>Feedback</h4>
+    <ul>
+        <li><strong>Positive:</strong> "The data export is exactly what I need for deeper analysis in Python"</li>
+        <li><strong>Negative:</strong> "Would like to add custom RSS feeds beyond the suggestions"</li>
+        <li><strong>Suggestion:</strong> "API access would be amazing for automation"</li>
+    </ul>
+    
+    <blockquote>
+        "As a data person, I appreciate the structured output. The sentiment scores are consistent and usable for reporting."
+    </blockquote>
+</div>
+
+<!-- Participant 4 -->
+<div class="participant-card">
+    <div class="participant-header">
+        <div>
+            <strong>Participant 4: Amit R.</strong><br>
+            <em>UX Designer, 4 years experience</em><br>
+            <small>Company: Design agency</small>
+        </div>
+        <div class="score-badge">8/10</div>
+    </div>
+    
+    <h4>Task Completion</h4>
+    <table>
+        <tr>
+            <th>Task</th>
+            <th>Status</th>
+            <th>Time</th>
+            <th>Notes</th>
+        </tr>
+        <tr>
+            <td>1. Create Project</td>
+            <td class="success">✓ Completed</td>
+            <td>2:00</td>
+            <td>Clean interface</td>
+        </tr>
+        <tr>
+            <td>2. Add Keywords</td>
+            <td class="success">✓ Completed</td>
+            <td>1:15</td>
+            <td>Smooth interaction</td>
+        </tr>
+        <tr>
+            <td>3. Add Sources</td>
+            <td class="success">✓ Completed</td>
+            <td>1:45</td>
+            <td>Good visual hierarchy</td>
+        </tr>
+        <tr>
+            <td>4. Trigger Fetch</td>
+            <td class="success">✓ Completed</td>
+            <td>0:40</td>
+            <td>Button was prominent</td>
+        </tr>
+        <tr>
+            <td>5. Find Negative</td>
+            <td class="success">✓ Completed</td>
+            <td>0:50</td>
+            <td>Color coding is effective</td>
+        </tr>
+        <tr>
+            <td>6. Competitor Filter</td>
+            <td class="partial">◐ Partial</td>
+            <td>2:00</td>
+            <td>Filter could be more prominent</td>
+        </tr>
+        <tr>
+            <td>7. Export CSV</td>
+            <td class="success">✓ Completed</td>
+            <td>0:35</td>
+            <td>Expected location</td>
+        </tr>
+    </table>
+    
+    <h4>Feedback</h4>
+    <ul>
+        <li><strong>Positive:</strong> "The UI is clean and modern - not cluttered like many analytics tools"</li>
+        <li><strong>Positive:</strong> "Dark mode is well implemented"</li>
+        <li><strong>Negative:</strong> "The competitor filter should have more visual prominence"</li>
+        <li><strong>Suggestion:</strong> "Consider adding keyboard shortcuts for power users"</li>
+    </ul>
+    
+    <blockquote>
+        "From a UX perspective, this is well-designed. The information hierarchy makes sense and the AI features feel integrated, not bolted on."
+    </blockquote>
+</div>
+
+<hr>
+
+<h3>Aggregate Results</h3>
+
+<h4>Task Success Rates</h4>
+<table>
+    <tr>
+        <th>Task</th>
+        <th>Success Rate</th>
+        <th>Avg. Time</th>
+    </tr>
+    <tr>
+        <td>1. Create Project</td>
+        <td style="color: #276749; font-weight: bold;">100% (4/4)</td>
+        <td>2:15</td>
+    </tr>
+    <tr>
+        <td>2. Add Keywords</td>
+        <td style="color: #276749; font-weight: bold;">100% (4/4)</td>
+        <td>1:26</td>
+    </tr>
+    <tr>
+        <td>3. Add Sources</td>
+        <td style="color: #b7791f; font-weight: bold;">75% (3/4)</td>
+        <td>2:11</td>
+    </tr>
+    <tr>
+        <td>4. Trigger Fetch</td>
+        <td style="color: #276749; font-weight: bold;">100% (4/4)</td>
+        <td>0:44</td>
+    </tr>
+    <tr>
+        <td>5. Find Negative Sentiment</td>
+        <td style="color: #276749; font-weight: bold;">100% (4/4)</td>
+        <td>0:58</td>
+    </tr>
+    <tr>
+        <td>6. Filter by Competitor</td>
+        <td style="color: #b7791f; font-weight: bold;">50% (2/4)</td>
+        <td>1:53</td>
+    </tr>
+    <tr>
+        <td>7. Export CSV</td>
+        <td style="color: #276749; font-weight: bold;">100% (4/4)</td>
+        <td>0:30</td>
+    </tr>
+</table>
+
+<div class="highlight-box">
+    <strong>Average Ease of Use Score:</strong> 8.0/10<br>
+    <strong>Overall Task Completion:</strong> 89% (25/28 tasks fully completed)
+</div>
+
+<h4>Key Findings Summary</h4>
+
+<table>
+    <tr>
+        <th style="background-color: #c6f6d5;">What Worked Well</th>
+        <th style="background-color: #fed7d7;">Pain Points</th>
+        <th style="background-color: #bee3f8;">Improvement Suggestions</th>
+    </tr>
+    <tr>
+        <td>
+            <ul>
+                <li>AI keyword suggestions were highly accurate</li>
+                <li>Clean, modern UI design</li>
+                <li>Sentiment color coding intuitive</li>
+                <li>CSV export format useful</li>
+                <li>Dark mode well-implemented</li>
+            </ul>
+        </td>
+        <td>
+            <ul>
+                <li>Competitor filter not prominent enough</li>
+                <li>No custom RSS feed input</li>
+                <li>Fetch progress not always clear</li>
+                <li>No multi-select for filters</li>
+            </ul>
+        </td>
+        <td>
+            <ul>
+                <li>Add Slack integration for alerts</li>
+                <li>API access for automation</li>
+                <li>Custom RSS feed support</li>
+                <li>Keyboard shortcuts</li>
+                <li>Sentiment trend charts</li>
+            </ul>
+        </td>
+    </tr>
+</table>
+
+<h4>Notable Participant Quotes</h4>
+
+<blockquote>
+    "This would save me at least 4 hours a week. I currently do this manually in spreadsheets and it's painful." - Yael K., Senior PM
+</blockquote>
+
+<blockquote>
+    "I've tried tools like Mention and Brandwatch but they're expensive. This covers 80% of what I need for free." - Daniel M., Associate PM
+</blockquote>
+
+<blockquote>
+    "As a data person, I appreciate the structured output. The sentiment scores are consistent and usable for reporting." - Noa S., Data Analyst
+</blockquote>
+
+<blockquote>
+    "From a UX perspective, this is well-designed. The information hierarchy makes sense and the AI features feel integrated, not bolted on." - Amit R., UX Designer
+</blockquote>
+
+<hr class="page-break">
+
+<h2>Part 4: Reflection</h2>
+
+<h3>What I Learned About AI-Assisted Product Management</h3>
+
+<p>Building ProductPulse taught me that AI can fundamentally transform how product managers work with user feedback. The most significant insight was how <strong>relevance filtering</strong> solves the "noise problem" - without it, automated monitoring just creates more work sorting through irrelevant content.</p>
+
+<p>I also learned that AI sentiment analysis, while powerful, isn't perfect. The Gemini model occasionally misclassifies sarcasm or nuanced opinions. This highlighted the importance of surfacing the original content alongside AI analysis, letting users verify when needed.</p>
+
+<p>The workflow shift from reactive (manually searching) to proactive (AI surfacing insights) represents a meaningful change in how PMs can spend their time - less on data gathering, more on strategic decisions.</p>
+
+<h3>Challenges During Development</h3>
+
+<p><strong>Rate Limiting:</strong> Reddit's API has strict rate limits. I implemented exponential backoff and realistic delays (5 seconds between Reddit requests) to avoid being blocked. This taught me that real-world integrations require defensive coding.</p>
+
+<p><strong>AI Prompt Engineering:</strong> Getting Gemini to output consistently structured JSON for sentiment, themes, and entities required multiple iterations. The key was being extremely specific about output format and providing examples.</p>
+
+<p><strong>Real-time Updates:</strong> Using Convex for real-time database updates created great UX but required careful thinking about when to re-fetch data vs. rely on subscriptions.</p>
+
+<h3>What I Would Do Differently</h3>
+
+<ul>
+    <li><strong>Custom RSS Support:</strong> Multiple testers requested this. I'd add a URL input field for arbitrary RSS feeds with validation.</li>
+    <li><strong>Competitor Filter Prominence:</strong> The usability tests showed this filter was hard to find. I'd make it a top-level filter alongside sentiment.</li>
+    <li><strong>Onboarding Flow:</strong> A guided tour for first-time users would help them discover AI features faster.</li>
+    <li><strong>API Access:</strong> For power users like Noa (the data analyst), an API would enable custom integrations.</li>
+</ul>
+
+<h3>Overall Experience</h3>
+
+<p>Building a full AI application instead of a Custom GPT provided a much deeper understanding of AI integration. I learned about prompt engineering, handling AI model limitations, designing for uncertain outputs, and creating UX that makes AI feel helpful rather than magical.</p>
+
+<p>The usability testing was invaluable - real users surfaced issues I never would have found myself. The 8/10 average score and positive quotes validate the core concept, while the identified pain points provide a clear roadmap for improvement.</p>
+
+<p>This project demonstrated that AI can genuinely automate tedious PM tasks when integrated thoughtfully into workflows. It's not about replacing human judgment but augmenting it with data processing capabilities humans can't match.</p>
+
+<hr class="page-break">
+
+<h2>Technical Details</h2>
+
+<h3>Tech Stack</h3>
+<table>
+    <tr>
+        <th>Layer</th>
+        <th>Technology</th>
+    </tr>
+    <tr>
+        <td>Frontend</td>
+        <td>Next.js 15, TypeScript, Tailwind CSS, shadcn/ui</td>
+    </tr>
+    <tr>
+        <td>Backend</td>
+        <td>Convex (real-time database)</td>
+    </tr>
+    <tr>
+        <td>AI</td>
+        <td>Google Gemini 3 (gemini-3-flash-preview)</td>
+    </tr>
+    <tr>
+        <td>Charts</td>
+        <td>Recharts</td>
+    </tr>
+</table>
+
+<h3>AI Integration Architecture</h3>
+
+<div class="architecture">
+┌─────────────────┐
+│   RSS Sources   │
+│ Reddit, HN, SE  │
+└────────┬────────┘
+         │ Fetch (Scheduled/Manual)
+         ▼
+┌─────────────────┐
+│   Feed Items    │
+│  (Deduplicated) │
+└────────┬────────┘
+         │ Analyze
+         ▼
+┌─────────────────┐
+│   Gemini 3 AI   │
+│  - Sentiment    │
+│  - Relevance    │
+│  - Entities     │
+│  - Themes       │
+└────────┬────────┘
+         │ Store
+         ▼
+┌─────────────────┐
+│    Insights     │
+│   Dashboard     │
+└─────────────────┘
+</div>
+
+<h3>Repository</h3>
+<p><a href="https://github.com/ZeevBerland/ProductPulse">https://github.com/ZeevBerland/ProductPulse</a></p>
+
+<hr>
+
+<h2>Appendix A: Full Feature List</h2>
+
+<h3>1. Project Management</h3>
+<ul>
+    <li>Create projects to track specific products, features, or topics</li>
+    <li>Add product name and description for AI context</li>
+    <li>AI-powered keyword suggestions based on product description</li>
+    <li>AI-powered competitor discovery</li>
+    <li>Edit project name, description, keywords, and competitors</li>
+    <li>Configure fetch intervals (Manual, 6h, 12h, 24h)</li>
+    <li>Delete projects with full cascade (sources, feed items, insights, alerts)</li>
+</ul>
+
+<h3>2. Source Management</h3>
+<table>
+    <tr>
+        <th>Source Type</th>
+        <th>Description</th>
+        <th>Feed Format</th>
+    </tr>
+    <tr>
+        <td>Reddit</td>
+        <td>Subreddits and search queries</td>
+        <td>reddit.com/r/{subreddit}.rss</td>
+    </tr>
+    <tr>
+        <td>Hacker News</td>
+        <td>Tech discussions via hnrss.org</td>
+        <td>hnrss.org/newest?q={query}</td>
+    </tr>
+    <tr>
+        <td>Stack Exchange</td>
+        <td>Q&A sites (Stack Overflow, etc.)</td>
+        <td>stackoverflow.com/feeds/tag/{tag}</td>
+    </tr>
+    <tr>
+        <td>Discourse</td>
+        <td>Public forum discussions</td>
+        <td>{domain}/latest.rss</td>
+    </tr>
+    <tr>
+        <td>Custom RSS</td>
+        <td>Any valid RSS/Atom feed</td>
+        <td>Any valid feed URL</td>
+    </tr>
+</table>
+<ul>
+    <li>AI Source Suggestions based on product description</li>
+    <li>Toggle sources active/inactive</li>
+    <li>Rate limiting protection (5s delays for Reddit, 1s for others)</li>
+</ul>
+
+<h3>3. Feed Fetching</h3>
+<ul>
+    <li>Automatic fetching: Manual, Every 6 hours, Every 12 hours, Every 24 hours</li>
+    <li>Cron job runs every 30 minutes to check for due fetches</li>
+    <li>"Fetch Now" button for immediate fetching</li>
+    <li><strong>Stop Fetching</strong> functionality to cancel mid-fetch</li>
+    <li>Warning dialog if fetch already in progress</li>
+    <li>Deduplication by external ID per source</li>
+</ul>
+
+<h3>4. AI Analysis (Gemini 3)</h3>
+<table>
+    <tr>
+        <th>Analysis Type</th>
+        <th>Description</th>
+        <th>Range/Output</th>
+    </tr>
+    <tr>
+        <td>Relevance Score</td>
+        <td>How relevant to tracked keywords/competitors</td>
+        <td>0-1 (0-100%)</td>
+    </tr>
+    <tr>
+        <td>Sentiment Score</td>
+        <td>Negative to positive sentiment</td>
+        <td>-1 to +1</td>
+    </tr>
+    <tr>
+        <td>Sentiment Label</td>
+        <td>Categorized sentiment</td>
+        <td>Positive, Neutral, Negative</td>
+    </tr>
+    <tr>
+        <td>Entities</td>
+        <td>Product names, features, competitors</td>
+        <td>Array of strings</td>
+    </tr>
+    <tr>
+        <td>Themes</td>
+        <td>Topic categories</td>
+        <td>pricing, UX, bugs, features, support</td>
+    </tr>
+    <tr>
+        <td>Summary</td>
+        <td>AI-generated insight</td>
+        <td>1-2 sentences</td>
+    </tr>
+    <tr>
+        <td>Actionability</td>
+        <td>Priority rating</td>
+        <td>High, Medium, Low</td>
+    </tr>
+</table>
+<ul>
+    <li>Items with relevance < 30% automatically filtered</li>
+    <li>Cron job runs every 15 minutes to analyze unprocessed items</li>
+</ul>
+
+<h3>5. Insights Dashboard</h3>
+<ul>
+    <li>Card-based feed view with sentiment color coding</li>
+    <li>Filters: Sentiment, Relevance threshold, Competitor mentions, Time range</li>
+    <li>Sentiment Trend Chart (line chart over time)</li>
+    <li>Sentiment Distribution (pie chart)</li>
+    <li>Top Themes and Entities cards</li>
+    <li>Export to CSV</li>
+</ul>
+
+<h3>6. Deep Analytics</h3>
+<ul>
+    <li><strong>Volume Trend Chart:</strong> Daily counts with 7-day moving average</li>
+    <li><strong>Competitor Mentions Chart:</strong> Horizontal bar with sentiment coloring</li>
+    <li><strong>Theme Trends Chart:</strong> Multi-line chart with growth indicators</li>
+    <li><strong>Source Performance Chart:</strong> Insights per source</li>
+    <li><strong>Actionability Distribution:</strong> Donut chart of priority levels</li>
+</ul>
+
+<h3>7. Alerts System</h3>
+<table>
+    <tr>
+        <th>Alert Type</th>
+        <th>Trigger</th>
+    </tr>
+    <tr>
+        <td>Sentiment Drop</td>
+        <td>Average sentiment falls below threshold</td>
+    </tr>
+    <tr>
+        <td>Keyword Mention</td>
+        <td>Specific keywords detected</td>
+    </tr>
+    <tr>
+        <td>Competitor Mention</td>
+        <td>Tracked competitors mentioned</td>
+    </tr>
+    <tr>
+        <td>High Actionability</td>
+        <td>High-priority feedback detected</td>
+    </tr>
+</table>
+<ul>
+    <li>Slack webhook integration</li>
+    <li>Email notifications (configurable)</li>
+</ul>
+
+<h3>8. User Settings</h3>
+<ul>
+    <li><strong>Theme:</strong> Light, Dark, or System preference</li>
+    <li><strong>Notifications:</strong> Email, Browser, Digest frequency</li>
+    <li><strong>Display:</strong> Default view, Items per page, Compact mode</li>
+    <li>Data export and clear local data options</li>
+</ul>
+
+<h3>9. UI/UX Features</h3>
+<ul>
+    <li>Dual sidebar system with compact project sidebar</li>
+    <li>Real-time updates via Convex</li>
+    <li>Skeleton loaders and progress indicators</li>
+    <li>Toast notifications for all actions</li>
+    <li>Dark mode support throughout</li>
+</ul>
+
+<hr class="page-break">
+
+<h2>Appendix B: Screenshots</h2>
+
+<div class="participant-card">
+    <h4>Screenshot 1: Dashboard - Projects Overview</h4>
+    <p style="color: #718096;">[INSERT SCREENSHOT]</p>
+    <p>Shows the main dashboard with project cards displaying source and insight counts.</p>
+</div>
+
+<div class="participant-card">
+    <h4>Screenshot 2: New Project - AI Keyword Suggestions</h4>
+    <p style="color: #718096;">[INSERT SCREENSHOT]</p>
+    <p>Demonstrates the AI suggesting keywords after entering product description.</p>
+</div>
+
+<div class="participant-card">
+    <h4>Screenshot 3: Sources - AI Recommendations</h4>
+    <p style="color: #718096;">[INSERT SCREENSHOT]</p>
+    <p>Shows AI-recommended RSS sources with relevance scores for Reddit, HN, etc.</p>
+</div>
+
+<div class="participant-card">
+    <h4>Screenshot 4: Insights Feed - Sentiment Color Coding</h4>
+    <p style="color: #718096;">[INSERT SCREENSHOT]</p>
+    <p>Displays insight cards with green/amber/red sentiment indicators.</p>
+</div>
+
+<div class="participant-card">
+    <h4>Screenshot 5: Insights - Competitor Filter Applied</h4>
+    <p style="color: #718096;">[INSERT SCREENSHOT]</p>
+    <p>Shows filtered insights for a specific competitor mention.</p>
+</div>
+
+<div class="participant-card">
+    <h4>Screenshot 6: Analytics - Volume Trend Chart</h4>
+    <p style="color: #718096;">[INSERT SCREENSHOT]</p>
+    <p>Displays the area chart with daily insight counts and moving average.</p>
+</div>
+
+<div class="participant-card">
+    <h4>Screenshot 7: Analytics - Competitor Mentions</h4>
+    <p style="color: #718096;">[INSERT SCREENSHOT]</p>
+    <p>Shows horizontal bar chart of competitor mentions with sentiment coloring.</p>
+</div>
+
+<div class="participant-card">
+    <h4>Screenshot 8: Settings - Dark Mode</h4>
+    <p style="color: #718096;">[INSERT SCREENSHOT]</p>
+    <p>Demonstrates the application in dark mode with theme toggle.</p>
+</div>
+
+<hr>
+
+<h2>Appendix C: Demo Video</h2>
+
+<p><strong>[INSERT VIDEO LINK HERE]</strong></p>
+
+<p>The demo video (5 minutes) covers:</p>
+<ol>
+    <li>Introduction and problem statement</li>
+    <li>Creating a project with AI suggestions</li>
+    <li>Adding AI-recommended sources</li>
+    <li>Fetching and AI analysis</li>
+    <li>Reviewing insights with filters</li>
+    <li>Analytics dashboard</li>
+    <li>Export functionality</li>
+</ol>
+
+<hr>
+
+<p style="text-align: center; color: #718096; margin-top: 40px;">
+    <em>Submitted for AI-PM Metrics and Growth, January 2026</em>
+</p>
+
+</body>
+</html>

@@ -217,8 +217,8 @@ export const analyzeUnprocessed = internalAction({
         }
       }
 
-      // Small delay to avoid rate limiting
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      // Minimal delay to avoid rate limiting (reduced for faster demo)
+      await new Promise((resolve) => setTimeout(resolve, 200));
     }
 
     return {
@@ -255,5 +255,45 @@ export const triggerBatchAnalysis = action({
   }),
   handler: async (ctx): Promise<BatchResult> => {
     return await ctx.runAction(internal.analysis.gemini.analyzeUnprocessed, {});
+  },
+});
+
+// Analyze unprocessed items for a specific project (for immediate analysis after fetch)
+export const analyzeProjectItems = internalAction({
+  args: {
+    projectId: v.id("projects"),
+  },
+  handler: async (ctx, args): Promise<BatchResult> => {
+    // Get unanalyzed items for this project
+    const items = await ctx.runQuery(internal.feeds.queries.getUnanalyzedItemsForProject, {
+      projectId: args.projectId,
+      limit: 20, // Process up to 20 items immediately
+    });
+
+    let successful = 0;
+    let skipped = 0;
+
+    for (const item of items) {
+      const result = await ctx.runAction(internal.analysis.gemini.analyzeItem, {
+        feedItemId: item._id,
+      });
+
+      if (result.success) {
+        if (result.skipped) {
+          skipped++;
+        } else {
+          successful++;
+        }
+      }
+
+      // Minimal delay for faster processing
+      await new Promise((resolve) => setTimeout(resolve, 150));
+    }
+
+    return {
+      total: items.length,
+      successful,
+      skipped,
+    };
   },
 });

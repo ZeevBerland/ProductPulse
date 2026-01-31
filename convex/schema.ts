@@ -1,8 +1,13 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
+import { authTables } from "@convex-dev/auth/server";
 
 export default defineSchema({
+  // Auth tables (users, sessions, accounts, etc.)
+  ...authTables,
+
   projects: defineTable({
+    userId: v.optional(v.id("users")), // Link to authenticated user (optional for legacy projects)
     name: v.string(),
     description: v.optional(v.string()),
     keywords: v.array(v.string()),
@@ -14,7 +19,8 @@ export default defineSchema({
       v.literal("stopping")
     )), // Current fetch status for stop functionality
     createdAt: v.number(),
-  }),
+  })
+    .index("by_user", ["userId"]),
 
   sources: defineTable({
     projectId: v.id("projects"),

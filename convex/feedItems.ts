@@ -159,3 +159,53 @@ export const batchInsert = mutation({
     return insertedIds;
   },
 });
+
+// Clean up old feed items and their insights for a project
+export const cleanupOldItems = mutation({
+  args: {
+    projectId: v.id("projects"),
+    maxAgeDays: v.optional(v.number()), // Default 30 days
+  },
+  handler: async (ctx, args) => {
+    const maxAgeDays = args.maxAgeDays ?? 30;
+    const cutoffDate = Date.now() - (maxAgeDays * 24 * 60 * 60 * 1000);
+
+    // Get all sources for this project
+    const sources = await ctx.db
+      .query("sources")
+      .withIndex("by_project", (q) => q.eq("projectId", args.projectId))
+      .collect();
+
+    let deletedFeedItems = 0;
+    let deletedInsights = 0;
+
+    for (const source of sources) {
+      // Get old feed items for this source
+      const feedItems = await ctx.db
+        .query("feedItems")
+        .withIndex("by_source", (q) => q.eq("sourceId", source._id))
+        .collect();
+
+      for (const item of feedItems) {
+        if (item.publishedAt < cutoffDate) {
+          // Delete associated insights first
+          const insights = await ctx.db
+            .query("insights")
+            .withIndex("by_feedItem", (q) => q.eq("feedItemId", item._id))
+            .collect();
+
+          for (const insight of insights) {
+            await ctx.db.delete(insight._id);
+            deletedInsights++;
+          }
+
+          // Delete the feed item
+          await ctx.db.delete(item._id);
+          deletedFeedItems++;
+        }
+      }
+    }
+
+    return { deletedFeedItems, deletedInsights, cutoffDays: maxAgeDays };
+  },
+});

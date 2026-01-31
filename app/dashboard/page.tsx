@@ -11,6 +11,7 @@ import Link from "next/link";
 
 export default function DashboardPage() {
   const projects = useQuery(api.projects.list);
+  const dashboardStats = useQuery(api.insights.getDashboardStats);
 
   const totalProjects = projects?.length || 0;
 
@@ -60,7 +61,11 @@ export default function DashboardPage() {
               <Rss className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">-</div>
+              {dashboardStats === undefined ? (
+                <Skeleton className="h-8 w-16" />
+              ) : (
+                <div className="text-2xl font-bold">{dashboardStats.activeSources}</div>
+              )}
               <p className="text-xs text-muted-foreground">
                 RSS feeds being monitored
               </p>
@@ -73,7 +78,11 @@ export default function DashboardPage() {
               <Lightbulb className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">-</div>
+              {dashboardStats === undefined ? (
+                <Skeleton className="h-8 w-16" />
+              ) : (
+                <div className="text-2xl font-bold">{dashboardStats.totalInsights}</div>
+              )}
               <p className="text-xs text-muted-foreground">
                 AI-analyzed feedback items
               </p>
@@ -86,7 +95,15 @@ export default function DashboardPage() {
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">-</div>
+              {dashboardStats === undefined ? (
+                <Skeleton className="h-8 w-16" />
+              ) : (
+                <div className="text-2xl font-bold">
+                  {dashboardStats.totalInsights > 0 
+                    ? (dashboardStats.avgSentiment > 0 ? "+" : "") + dashboardStats.avgSentiment.toFixed(2)
+                    : "N/A"}
+                </div>
+              )}
               <p className="text-xs text-muted-foreground">
                 Across all projects
               </p>

@@ -1,12 +1,47 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
+import { auth } from "./auth";
 
-// List all projects
+// Helper to get authenticated user ID
+async function getAuthenticatedUserId(ctx: any) {
+  const userId = await auth.getUserId(ctx);
+  return userId;
+}
+
+// List all projects for the current user (includes legacy projects without userId)
 export const list = query({
   args: {},
   handler: async (ctx) => {
-    const projects = await ctx.db.query("projects").order("desc").collect();
-    return projects;
+    const userId = await getAuthenticatedUserId(ctx);
+    if (!userId) {
+      // Not authenticated - return only legacy projects (for backwards compatibility)
+      const legacyProjects = await ctx.db
+        .query("projects")
+        .filter((q) => q.eq(q.field("userId"), undefined))
+        .order("desc")
+        .collect();
+      return legacyProjects;
+    }
+    
+    // Get user's projects
+    const userProjects = await ctx.db
+      .query("projects")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .order("desc")
+      .collect();
+    
+    // Also get legacy projects (without userId)
+    const legacyProjects = await ctx.db
+      .query("projects")
+      .filter((q) => q.eq(q.field("userId"), undefined))
+      .order("desc")
+      .collect();
+    
+    // Combine and sort by createdAt
+    const allProjects = [...userProjects, ...legacyProjects];
+    allProjects.sort((a, b) => b.createdAt - a.createdAt);
+    
+    return allProjects;
   },
 });
 
@@ -14,11 +49,56 @@ export const list = query({
 export const listWithStats = query({
   args: {},
   handler: async (ctx) => {
-    const projects = await ctx.db.query("projects").order("desc").collect();
+    const userId = await getAuthenticatedUserId(ctx);
+    if (!userId) {
+      // Not authenticated - return only legacy projects
+      const legacyProjects = await ctx.db
+        .query("projects")
+        .filter((q) => q.eq(q.field("userId"), undefined))
+        .order("desc")
+        .collect();
+      
+      const projectsWithStats = await Promise.all(
+        legacyProjects.map(async (project) => {
+          const sources = await ctx.db
+            .query("sources")
+            .withIndex("by_project", (q) => q.eq("projectId", project._id))
+            .collect();
+          const insights = await ctx.db
+            .query("insights")
+            .withIndex("by_project", (q) => q.eq("projectId", project._id))
+            .collect();
+          return {
+            ...project,
+            sourceCount: sources.length,
+            insightCount: insights.length,
+          };
+        })
+      );
+      return projectsWithStats;
+    }
+    
+    // Get user's projects
+    const userProjects = await ctx.db
+      .query("projects")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .order("desc")
+      .collect();
+    
+    // Also get legacy projects (without userId)
+    const legacyProjects = await ctx.db
+      .query("projects")
+      .filter((q) => q.eq(q.field("userId"), undefined))
+      .order("desc")
+      .collect();
+    
+    // Combine projects
+    const allProjects = [...userProjects, ...legacyProjects];
+    allProjects.sort((a, b) => b.createdAt - a.createdAt);
     
     // Get counts for each project
     const projectsWithStats = await Promise.all(
-      projects.map(async (project) => {
+      allProjects.map(async (project) => {
         const sources = await ctx.db
           .query("sources")
           .withIndex("by_project", (q) => q.eq("projectId", project._id))
@@ -41,21 +121,49 @@ export const listWithStats = query({
   },
 });
 
-// Get a single project by ID
+// Get a single project by ID (verifies ownership)
 export const get = query({
   args: { id: v.id("projects") },
   handler: async (ctx, args) => {
+    const userId = await getAuthenticatedUserId(ctx);
     const project = await ctx.db.get(args.id);
+    
+    if (!project) return null;
+    
+    // If user is logged in, verify ownership
+    // Allow access to legacy projects (no userId) for backwards compatibility
+    if (userId && project.userId && project.userId !== userId) {
+      return null;
+    }
+    
+    // If user is not logged in, only allow access to legacy projects
+    if (!userId && project.userId) {
+      return null;
+    }
+    
     return project;
   },
 });
 
-// Get project with stats
+// Get project with stats (verifies ownership)
 export const getWithStats = query({
   args: { id: v.id("projects") },
   handler: async (ctx, args) => {
+    const userId = await getAuthenticatedUserId(ctx);
     const project = await ctx.db.get(args.id);
+    
     if (!project) return null;
+    
+    // If user is logged in, verify ownership
+    // Allow access to legacy projects (no userId) for backwards compatibility
+    if (userId && project.userId && project.userId !== userId) {
+      return null;
+    }
+    
+    // If user is not logged in, only allow access to legacy projects
+    if (!userId && project.userId) {
+      return null;
+    }
 
     // Get sources count
     const sources = await ctx.db
@@ -105,7 +213,13 @@ export const create = mutation({
     keywords: v.array(v.string()),
   },
   handler: async (ctx, args) => {
+    const userId = await getAuthenticatedUserId(ctx);
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
+    
     const projectId = await ctx.db.insert("projects", {
+      userId, // Link to authenticated user
       name: args.name,
       description: args.description,
       keywords: args.keywords,
@@ -115,7 +229,7 @@ export const create = mutation({
   },
 });
 
-// Update a project
+// Update a project (verifies ownership)
 export const update = mutation({
   args: {
     id: v.id("projects"),
@@ -124,6 +238,16 @@ export const update = mutation({
     keywords: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
+    const userId = await getAuthenticatedUserId(ctx);
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
+    
+    const project = await ctx.db.get(args.id);
+    if (!project || project.userId !== userId) {
+      throw new Error("Project not found or access denied");
+    }
+    
     const { id, ...updates } = args;
     
     // Filter out undefined values
@@ -160,8 +284,14 @@ export const createWithSources = mutation({
     ),
   },
   handler: async (ctx, args) => {
+    const userId = await getAuthenticatedUserId(ctx);
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
+    
     // Create the project
     const projectId = await ctx.db.insert("projects", {
+      userId, // Link to authenticated user
       name: args.name,
       description: args.description,
       keywords: args.keywords,
@@ -183,7 +313,7 @@ export const createWithSources = mutation({
   },
 });
 
-// Add sources to an existing project
+// Add sources to an existing project (verifies ownership)
 export const addSources = mutation({
   args: {
     projectId: v.id("projects"),
@@ -202,9 +332,14 @@ export const addSources = mutation({
     ),
   },
   handler: async (ctx, args) => {
+    const userId = await getAuthenticatedUserId(ctx);
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
+    
     const project = await ctx.db.get(args.projectId);
-    if (!project) {
-      throw new Error("Project not found");
+    if (!project || project.userId !== userId) {
+      throw new Error("Project not found or access denied");
     }
 
     const createdIds = [];
@@ -223,39 +358,64 @@ export const addSources = mutation({
   },
 });
 
-// Update fetch interval for a project
+// Update fetch interval for a project (verifies ownership)
 export const updateFetchInterval = mutation({
   args: {
     id: v.id("projects"),
     fetchInterval: v.number(), // minutes (0 = manual only)
   },
   handler: async (ctx, args) => {
+    const userId = await getAuthenticatedUserId(ctx);
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
+    
+    const project = await ctx.db.get(args.id);
+    if (!project || project.userId !== userId) {
+      throw new Error("Project not found or access denied");
+    }
+    
     await ctx.db.patch(args.id, { fetchInterval: args.fetchInterval });
     return args.id;
   },
 });
 
-// Set fetch status for a project
+// Set fetch status for a project (verifies ownership)
 export const setFetchStatus = mutation({
   args: {
     id: v.id("projects"),
     status: v.union(v.literal("idle"), v.literal("fetching"), v.literal("stopping")),
   },
   handler: async (ctx, args) => {
+    const userId = await getAuthenticatedUserId(ctx);
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
+    
+    const project = await ctx.db.get(args.id);
+    if (!project || project.userId !== userId) {
+      throw new Error("Project not found or access denied");
+    }
+    
     await ctx.db.patch(args.id, { fetchStatus: args.status });
     return args.id;
   },
 });
 
-// Request to stop fetching for a project
+// Request to stop fetching for a project (verifies ownership)
 export const requestStopFetch = mutation({
   args: {
     id: v.id("projects"),
   },
   handler: async (ctx, args) => {
+    const userId = await getAuthenticatedUserId(ctx);
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
+    
     const project = await ctx.db.get(args.id);
-    if (!project) {
-      throw new Error("Project not found");
+    if (!project || project.userId !== userId) {
+      throw new Error("Project not found or access denied");
     }
     
     // Only set to stopping if currently fetching
@@ -268,16 +428,21 @@ export const requestStopFetch = mutation({
   },
 });
 
-// Add a competitor to a project
+// Add a competitor to a project (verifies ownership)
 export const addCompetitor = mutation({
   args: {
     projectId: v.id("projects"),
     competitor: v.string(),
   },
   handler: async (ctx, args) => {
+    const userId = await getAuthenticatedUserId(ctx);
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
+    
     const project = await ctx.db.get(args.projectId);
-    if (!project) {
-      throw new Error("Project not found");
+    if (!project || project.userId !== userId) {
+      throw new Error("Project not found or access denied");
     }
 
     const competitors = project.competitors || [];
@@ -293,16 +458,21 @@ export const addCompetitor = mutation({
   },
 });
 
-// Remove a competitor from a project
+// Remove a competitor from a project (verifies ownership)
 export const removeCompetitor = mutation({
   args: {
     projectId: v.id("projects"),
     competitor: v.string(),
   },
   handler: async (ctx, args) => {
+    const userId = await getAuthenticatedUserId(ctx);
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
+    
     const project = await ctx.db.get(args.projectId);
-    if (!project) {
-      throw new Error("Project not found");
+    if (!project || project.userId !== userId) {
+      throw new Error("Project not found or access denied");
     }
 
     const competitors = project.competitors || [];
@@ -316,16 +486,21 @@ export const removeCompetitor = mutation({
   },
 });
 
-// Set multiple competitors for a project (replace all)
+// Set multiple competitors for a project (verifies ownership)
 export const setCompetitors = mutation({
   args: {
     projectId: v.id("projects"),
     competitors: v.array(v.string()),
   },
   handler: async (ctx, args) => {
+    const userId = await getAuthenticatedUserId(ctx);
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
+    
     const project = await ctx.db.get(args.projectId);
-    if (!project) {
-      throw new Error("Project not found");
+    if (!project || project.userId !== userId) {
+      throw new Error("Project not found or access denied");
     }
 
     await ctx.db.patch(args.projectId, {
@@ -336,10 +511,20 @@ export const setCompetitors = mutation({
   },
 });
 
-// Delete a project and all related data
+// Delete a project and all related data (verifies ownership)
 export const remove = mutation({
   args: { id: v.id("projects") },
   handler: async (ctx, args) => {
+    const userId = await getAuthenticatedUserId(ctx);
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
+    
+    const project = await ctx.db.get(args.id);
+    if (!project || project.userId !== userId) {
+      throw new Error("Project not found or access denied");
+    }
+    
     // Delete all insights for this project
     const insights = await ctx.db
       .query("insights")

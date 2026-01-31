@@ -1,6 +1,10 @@
 // RSS/Atom feed parser for Convex actions
 // Uses simple regex-based parsing since we're in a Convex action environment
 
+// Safety limits for parsing
+const MAX_REGEX_ITERATIONS = 10000;
+const FETCH_TIMEOUT_MS = 15000; // 15 seconds timeout (reduced for faster demo)
+
 export interface FeedItem {
   id: string;
   title: string;
@@ -77,8 +81,15 @@ function parseRSS(xml: string): ParsedFeed {
   // Extract all <item> elements
   const itemRegex = /<item>([\s\S]*?)<\/item>/gi;
   let itemMatch;
+  let iterations = 0;
 
   while ((itemMatch = itemRegex.exec(xml)) !== null) {
+    // Safety guard: prevent infinite loops with malformed XML
+    if (++iterations > MAX_REGEX_ITERATIONS) {
+      console.warn(`RSS parsing: iteration limit reached (${MAX_REGEX_ITERATIONS}), stopping parse`);
+      break;
+    }
+
     const itemXml = itemMatch[1];
 
     const title = extractTag(itemXml, "title") || "Untitled";
@@ -118,8 +129,15 @@ function parseAtom(xml: string): ParsedFeed {
   // Extract all <entry> elements
   const entryRegex = /<entry>([\s\S]*?)<\/entry>/gi;
   let entryMatch;
+  let iterations = 0;
 
   while ((entryMatch = entryRegex.exec(xml)) !== null) {
+    // Safety guard: prevent infinite loops with malformed XML
+    if (++iterations > MAX_REGEX_ITERATIONS) {
+      console.warn(`Atom parsing: iteration limit reached (${MAX_REGEX_ITERATIONS}), stopping parse`);
+      break;
+    }
+
     const entryXml = entryMatch[1];
 
     const title = extractTag(entryXml, "title") || "Untitled";
@@ -165,16 +183,20 @@ export function parseFeed(xml: string): ParsedFeed {
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 // Fetch and parse a feed URL with retry logic for rate limiting
-export async function fetchFeed(url: string, retries = 2): Promise<ParsedFeed> {
+export async function fetchFeed(url: string, retries = 1): Promise<ParsedFeed> {
   let lastError: Error | null = null;
   const isReddit = url.includes("reddit.com");
   
   for (let attempt = 0; attempt <= retries; attempt++) {
+    // Create AbortController for timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+
     try {
       // Add initial delay for Reddit to avoid rate limiting
       if (isReddit && attempt === 0) {
-        // Random delay 1-3 seconds to spread out requests
-        await sleep(1000 + Math.random() * 2000);
+        // Reduced delay for faster demo (500ms-1s)
+        await sleep(500 + Math.random() * 500);
       }
 
       const response = await fetch(url, {
@@ -186,18 +208,16 @@ export async function fetchFeed(url: string, retries = 2): Promise<ParsedFeed> {
           "Accept": "application/rss+xml, application/xml, text/xml, application/atom+xml, text/html, */*",
           "Accept-Language": "en-US,en;q=0.9",
         },
+        signal: controller.signal, // Add abort signal for timeout
       });
 
-      // Handle rate limiting with retry
+      // Clear timeout on successful response
+      clearTimeout(timeoutId);
+
+      // Handle rate limiting - skip immediately instead of waiting (faster for demo)
       if (response.status === 429) {
-        if (attempt >= retries) {
-          throw new Error(`Rate limited by ${isReddit ? 'Reddit' : 'server'} after ${retries + 1} attempts`);
-        }
-        // Long wait for rate limiting - Reddit needs 30+ seconds
-        const waitTime = isReddit ? 30000 + (attempt * 15000) : 10000 + (attempt * 5000);
-        console.log(`Rate limited on ${url}, waiting ${waitTime / 1000}s before retry ${attempt + 1}/${retries}`);
-        await sleep(waitTime);
-        continue;
+        console.warn(`Rate limited on ${url} - skipping (try again later)`);
+        throw new Error(`Skipped: Rate limited by ${isReddit ? 'Reddit' : 'server'}`);
       }
 
       if (!response.ok) {
@@ -207,6 +227,21 @@ export async function fetchFeed(url: string, retries = 2): Promise<ParsedFeed> {
       const xml = await response.text();
       return parseFeed(xml);
     } catch (error) {
+      // Clear timeout on error
+      clearTimeout(timeoutId);
+
+      // Handle timeout/abort specifically
+      if (error instanceof Error && error.name === 'AbortError') {
+        lastError = new Error(`Fetch timeout after ${FETCH_TIMEOUT_MS / 1000} seconds: ${url}`);
+        console.warn(lastError.message);
+        // Don't retry on timeout - move to next attempt
+        if (attempt >= retries) {
+          break;
+        }
+        await sleep(isReddit ? 2000 : 1000);
+        continue;
+      }
+
       lastError = error instanceof Error ? error : new Error(String(error));
       
       // Don't retry on 404 or other client errors
@@ -219,8 +254,8 @@ export async function fetchFeed(url: string, retries = 2): Promise<ParsedFeed> {
         break;
       }
       
-      // Wait before retrying on other errors
-      const waitTime = isReddit ? 15000 : 3000;
+      // Wait before retrying on other errors (reduced for faster demo)
+      const waitTime = isReddit ? 3000 : 1000;
       await sleep(waitTime);
     }
   }

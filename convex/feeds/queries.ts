@@ -92,3 +92,37 @@ export const getProject = internalQuery({
     return await ctx.db.get(args.id);
   },
 });
+
+// Get unanalyzed feed items for a specific project (internal)
+export const getUnanalyzedItemsForProject = internalQuery({
+  args: { 
+    projectId: v.id("projects"),
+    limit: v.optional(v.number()) 
+  },
+  handler: async (ctx, args) => {
+    // Get all sources for this project
+    const sources = await ctx.db
+      .query("sources")
+      .withIndex("by_project", (q) => q.eq("projectId", args.projectId))
+      .collect();
+    
+    const sourceIds = sources.map(s => s._id);
+    
+    // Get unanalyzed items for these sources
+    const allUnanalyzed = await ctx.db
+      .query("feedItems")
+      .withIndex("by_analyzed", (q) => q.eq("analyzed", false))
+      .order("desc")
+      .collect();
+    
+    // Filter to only items from this project's sources
+    const projectItems = allUnanalyzed.filter(item => 
+      sourceIds.some(id => id === item.sourceId)
+    );
+    
+    if (args.limit) {
+      return projectItems.slice(0, args.limit);
+    }
+    return projectItems;
+  },
+});

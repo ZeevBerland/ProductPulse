@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { UserButton } from "@/components/auth/user-button";
 
 interface SidebarProps {
   projectId?: string;
@@ -148,11 +149,14 @@ export function Sidebar({ projectId }: SidebarProps) {
         )}
       </ScrollArea>
 
-      {/* Footer */}
+      {/* Footer with User */}
       <div className="border-t p-4">
-        <p className="text-xs text-muted-foreground text-center">
-          ProductPulse v1.0
-        </p>
+        <div className="flex items-center justify-between">
+          <p className="text-xs text-muted-foreground">
+            ProductPulse v1.0
+          </p>
+          <UserButton />
+        </div>
       </div>
     </div>
   );

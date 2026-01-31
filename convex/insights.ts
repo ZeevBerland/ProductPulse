@@ -135,6 +135,61 @@ export const getStats = query({
   },
 });
 
+// Get dashboard-wide stats across all user's projects
+export const getDashboardStats = query({
+  args: {},
+  handler: async (ctx) => {
+    // Get all projects (including legacy ones)
+    const allProjects = await ctx.db.query("projects").collect();
+    
+    if (allProjects.length === 0) {
+      return {
+        totalSources: 0,
+        activeSources: 0,
+        totalInsights: 0,
+        avgSentiment: 0,
+      };
+    }
+
+    // Get all sources for these projects
+    let totalSources = 0;
+    let activeSources = 0;
+    let totalInsights = 0;
+    let totalSentiment = 0;
+    let insightCount = 0;
+
+    for (const project of allProjects) {
+      const sources = await ctx.db
+        .query("sources")
+        .withIndex("by_project", (q) => q.eq("projectId", project._id))
+        .collect();
+      
+      totalSources += sources.length;
+      activeSources += sources.filter(s => s.active).length;
+
+      const insights = await ctx.db
+        .query("insights")
+        .withIndex("by_project", (q) => q.eq("projectId", project._id))
+        .collect();
+      
+      totalInsights += insights.length;
+      for (const insight of insights) {
+        totalSentiment += insight.sentimentScore;
+        insightCount++;
+      }
+    }
+
+    const avgSentiment = insightCount > 0 ? totalSentiment / insightCount : 0;
+
+    return {
+      totalSources,
+      activeSources,
+      totalInsights,
+      avgSentiment,
+    };
+  },
+});
+
 // Get sentiment trend over time
 export const getSentimentTrend = query({
   args: {

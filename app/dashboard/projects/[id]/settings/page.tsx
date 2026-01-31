@@ -7,6 +7,7 @@ import { Id } from "@/convex/_generated/dataModel";
 import { Header } from "@/components/dashboard/header";
 import { ProjectForm } from "@/components/forms/project-form";
 import { DeleteProjectCard } from "@/components/dashboard/delete-project-card";
+import { FetchSettingsCard } from "@/components/dashboard/fetch-settings-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertCircle } from "lucide-react";
@@ -76,6 +77,12 @@ export default function ProjectSettingsPage({
               competitors: project.competitors,
               fetchInterval: project.fetchInterval,
             }}
+          />
+
+          {/* Fetch Settings with Cleanup */}
+          <FetchSettingsCard
+            projectId={project._id}
+            currentInterval={project.fetchInterval}
           />
 
           {/* Danger Zone - Delete Project */}

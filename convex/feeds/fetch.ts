@@ -6,8 +6,14 @@ import { internal } from "../_generated/api";
 import { fetchFeed } from "./parser";
 
 // Result types
-type FetchResult = { success: boolean; itemsAdded: number; error?: string };
+type FetchResult = { success: boolean; itemsAdded: number; skippedOld: number; skippedLimit: number; error?: string };
 type FetchAllResult = { total: number; successful: number; itemsAdded: number };
+
+// Maximum age for feed items (2 days - only recent content)
+const MAX_ITEM_AGE_DAYS = 2;
+
+// Maximum items to process per feed (prevents very long processing times)
+const MAX_ITEMS_PER_FEED = 100;
 
 // Fetch a single source's RSS feed
 export const fetchSource = internalAction({
@@ -21,20 +27,41 @@ export const fetchSource = internalAction({
     });
 
     if (!source) {
-      return { success: false, itemsAdded: 0, error: "Source not found" };
+      return { success: false, itemsAdded: 0, skippedOld: 0, skippedLimit: 0, error: "Source not found" };
     }
 
     if (!source.active) {
-      return { success: false, itemsAdded: 0, error: "Source is not active" };
+      return { success: false, itemsAdded: 0, skippedOld: 0, skippedLimit: 0, error: "Source is not active" };
     }
 
     try {
       // Fetch and parse the feed
       const feed = await fetchFeed(source.feedUrl);
 
-      // Insert new items
+      // Calculate cutoff date (items older than MAX_ITEM_AGE_DAYS are skipped)
+      const cutoffDate = Date.now() - (MAX_ITEM_AGE_DAYS * 24 * 60 * 60 * 1000);
+
+      // Insert new items with limits
       let itemsAdded = 0;
+      let skippedOld = 0;
+      let skippedLimit = 0;
+      let processedCount = 0;
+      
       for (const item of feed.items) {
+        // Safety limit: stop processing if we've hit the max items per feed
+        if (processedCount >= MAX_ITEMS_PER_FEED) {
+          skippedLimit = feed.items.length - processedCount;
+          console.log(`Reached max items limit (${MAX_ITEMS_PER_FEED}) for source ${source.name}, skipping ${skippedLimit} remaining items`);
+          break;
+        }
+
+        // Skip items older than cutoff date
+        if (item.pubDate.getTime() < cutoffDate) {
+          skippedOld++;
+          processedCount++;
+          continue;
+        }
+
         const wasInserted = await ctx.runMutation(internal.feeds.mutations.insertFeedItem, {
           sourceId: args.sourceId,
           externalId: item.id,
@@ -48,6 +75,7 @@ export const fetchSource = internalAction({
         if (wasInserted) {
           itemsAdded++;
         }
+        processedCount++;
       }
 
       // Update last fetched timestamp
@@ -55,11 +83,11 @@ export const fetchSource = internalAction({
         sourceId: args.sourceId,
       });
 
-      return { success: true, itemsAdded };
+      return { success: true, itemsAdded, skippedOld, skippedLimit };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
       console.error(`Error fetching source ${args.sourceId}:`, errorMessage);
-      return { success: false, itemsAdded: 0, error: errorMessage };
+      return { success: false, itemsAdded: 0, skippedOld: 0, skippedLimit: 0, error: errorMessage };
     }
   },
 });
@@ -84,7 +112,7 @@ export const fetchAllSources = internalAction({
     // Fetch non-Reddit sources first
     for (let i = 0; i < otherSources.length; i++) {
       const source = otherSources[i];
-      if (i > 0) await delayInternal(1000);
+      if (i > 0) await delayInternal(200); // Reduced for faster demo
 
       const result = await ctx.runAction(internal.feeds.fetch.fetchSource, {
         sourceId: source._id,
@@ -99,7 +127,7 @@ export const fetchAllSources = internalAction({
     // Fetch Reddit sources with longer delays
     for (let i = 0; i < redditSources.length; i++) {
       const source = redditSources[i];
-      await delayInternal(5000); // 5 seconds between Reddit
+      await delayInternal(2000); // Reduced from 5s for faster demo
 
       const result = await ctx.runAction(internal.feeds.fetch.fetchSource, {
         sourceId: source._id,
@@ -146,10 +174,33 @@ export const fetchSourcesWithInterval = internalAction({
     const redditSources = dueSources.filter(s => s.feedUrl.includes("reddit.com"));
     const otherSources = dueSources.filter(s => !s.feedUrl.includes("reddit.com"));
 
+    // Track projects to check stop status (avoid repeated queries for same project)
+    const projectStopStatus = new Map<string, boolean>();
+    
+    // Helper to check if a project has requested stop
+    const isProjectStopping = async (projectId: string): Promise<boolean> => {
+      if (projectStopStatus.has(projectId)) {
+        return projectStopStatus.get(projectId)!;
+      }
+      const project = await ctx.runQuery(internal.feeds.queries.getProject, {
+        id: projectId as any, // Cast needed for Id type
+      });
+      const isStopping = project?.fetchStatus === "stopping";
+      projectStopStatus.set(projectId, isStopping);
+      return isStopping;
+    };
+
     // Fetch non-Reddit sources first
     for (let i = 0; i < otherSources.length; i++) {
       const source = otherSources[i];
-      if (i > 0) await delayInternal(1000);
+      
+      // Check if this project has requested stop
+      if (await isProjectStopping(source.projectId)) {
+        console.log(`Skipping source ${source.name} - project requested stop`);
+        continue;
+      }
+      
+      if (i > 0) await delayInternal(200); // Reduced for faster processing
 
       fetchedCount++;
       const result = await ctx.runAction(internal.feeds.fetch.fetchSource, {
@@ -165,7 +216,14 @@ export const fetchSourcesWithInterval = internalAction({
     // Fetch Reddit sources with longer delays
     for (let i = 0; i < redditSources.length; i++) {
       const source = redditSources[i];
-      await delayInternal(5000);
+      
+      // Check if this project has requested stop
+      if (await isProjectStopping(source.projectId)) {
+        console.log(`Skipping Reddit source ${source.name} - project requested stop`);
+        continue;
+      }
+      
+      await delayInternal(2000); // Reduced from 5s for faster processing
 
       fetchedCount++;
       const result = await ctx.runAction(internal.feeds.fetch.fetchSource, {
@@ -259,7 +317,7 @@ export const triggerFetchProject = action({
     const redditSources = projectSources.filter(s => s.feedUrl.includes("reddit.com"));
     const otherSources = projectSources.filter(s => !s.feedUrl.includes("reddit.com"));
 
-    // Fetch non-Reddit sources first (faster)
+    // Fetch non-Reddit sources first (faster) - minimal delay for speed
     for (let i = 0; i < otherSources.length; i++) {
       // Check if stop was requested
       if (await shouldStop()) {
@@ -270,7 +328,7 @@ export const triggerFetchProject = action({
       const source = otherSources[i];
       
       if (i > 0) {
-        await delay(1000); // 1 second between non-Reddit sources
+        await delay(200); // Reduced to 200ms between non-Reddit sources for faster demo
       }
 
       const result = await ctx.runAction(internal.feeds.fetch.fetchSource, {
@@ -296,8 +354,8 @@ export const triggerFetchProject = action({
 
         const source = redditSources[i];
         
-        // 5 seconds between Reddit sources to avoid rate limiting
-        await delay(5000);
+        // 2 seconds between Reddit sources (reduced from 5s for faster demo)
+        await delay(2000);
 
         const result = await ctx.runAction(internal.feeds.fetch.fetchSource, {
           sourceId: source._id,
@@ -309,6 +367,24 @@ export const triggerFetchProject = action({
         } else if (result.error) {
           errors.push(`${source.name}: ${result.error}`);
         }
+      }
+    }
+
+    // Set fetch status to "analyzing" while processing
+    if (totalItemsAdded > 0 && !stopped) {
+      await ctx.runMutation(internal.feeds.mutations.setProjectFetchStatus, {
+        projectId: args.projectId,
+        status: "idle", // Will show as analyzing in the UI
+      });
+      
+      // Trigger immediate analysis for new items (don't wait for cron)
+      try {
+        await ctx.runAction(internal.analysis.gemini.analyzeProjectItems, {
+          projectId: args.projectId,
+        });
+      } catch (e) {
+        console.error("Analysis failed:", e);
+        // Don't fail the whole operation if analysis fails
       }
     }
 

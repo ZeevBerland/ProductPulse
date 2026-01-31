@@ -1,6 +1,13 @@
+"use client";
+
 import Link from "next/link";
+import { useConvexAuth } from "convex/react";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 
 export default function Home() {
+  const { isAuthenticated, isLoading } = useConvexAuth();
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted">
       {/* Header */}
@@ -13,12 +20,22 @@ export default function Home() {
             <span className="font-bold text-xl">ProductPulse</span>
           </div>
           <nav className="flex items-center gap-4">
-            <Link
-              href="/dashboard"
-              className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90"
-            >
-              Go to Dashboard
-            </Link>
+            {isLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : isAuthenticated ? (
+              <Link href="/dashboard">
+                <Button>Go to Dashboard</Button>
+              </Link>
+            ) : (
+              <>
+                <Link href="/login">
+                  <Button variant="ghost">Sign In</Button>
+                </Link>
+                <Link href="/signup">
+                  <Button>Get Started</Button>
+                </Link>
+              </>
+            )}
           </nav>
         </div>
       </header>
@@ -41,17 +58,15 @@ export default function Home() {
             insights, track sentiment trends, and discover feature opportunities.
           </p>
           <div className="flex gap-4">
-            <Link
-              href="/dashboard"
-              className="inline-flex h-11 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90"
-            >
-              Get Started
+            <Link href={isAuthenticated ? "/dashboard" : "/signup"}>
+              <Button size="lg" className="px-8">
+                {isAuthenticated ? "Go to Dashboard" : "Get Started Free"}
+              </Button>
             </Link>
-            <Link
-              href="#features"
-              className="inline-flex h-11 items-center justify-center rounded-md border border-input bg-background px-8 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
-            >
-              Learn More
+            <Link href="#features">
+              <Button variant="outline" size="lg" className="px-8">
+                Learn More
+              </Button>
             </Link>
           </div>
         </div>
