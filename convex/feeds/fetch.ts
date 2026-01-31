@@ -124,10 +124,11 @@ export const fetchAllSources = internalAction({
       }
     }
 
-    // Fetch Reddit sources with longer delays
+    // Fetch Reddit sources with longer delays (Reddit rate limits aggressively)
     for (let i = 0; i < redditSources.length; i++) {
       const source = redditSources[i];
-      await delayInternal(2000); // Reduced from 5s for faster demo
+      // 8-12 seconds between Reddit requests to avoid rate limiting
+      await delayInternal(8000 + Math.random() * 4000);
 
       const result = await ctx.runAction(internal.feeds.fetch.fetchSource, {
         sourceId: source._id,
@@ -213,7 +214,7 @@ export const fetchSourcesWithInterval = internalAction({
       }
     }
 
-    // Fetch Reddit sources with longer delays
+    // Fetch Reddit sources with longer delays (Reddit rate limits aggressively)
     for (let i = 0; i < redditSources.length; i++) {
       const source = redditSources[i];
       
@@ -223,7 +224,8 @@ export const fetchSourcesWithInterval = internalAction({
         continue;
       }
       
-      await delayInternal(2000); // Reduced from 5s for faster processing
+      // 8-12 seconds between Reddit requests to avoid rate limiting
+      await delayInternal(8000 + Math.random() * 4000);
 
       fetchedCount++;
       const result = await ctx.runAction(internal.feeds.fetch.fetchSource, {
@@ -354,8 +356,8 @@ export const triggerFetchProject = action({
 
         const source = redditSources[i];
         
-        // 2 seconds between Reddit sources (reduced from 5s for faster demo)
-        await delay(2000);
+        // 8-12 seconds between Reddit sources (Reddit rate limits aggressively from server IPs)
+        await delay(8000 + Math.random() * 4000);
 
         const result = await ctx.runAction(internal.feeds.fetch.fetchSource, {
           sourceId: source._id,

@@ -195,8 +195,8 @@ export async function fetchFeed(url: string, retries = 1): Promise<ParsedFeed> {
     try {
       // Add initial delay for Reddit to avoid rate limiting
       if (isReddit && attempt === 0) {
-        // Reduced delay for faster demo (500ms-1s)
-        await sleep(500 + Math.random() * 500);
+        // 2-4 second initial delay for Reddit
+        await sleep(2000 + Math.random() * 2000);
       }
 
       const response = await fetch(url, {
