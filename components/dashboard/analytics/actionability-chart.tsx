@@ -65,7 +65,7 @@ export function ActionabilityChart({ projectId, daysBack = 30 }: ActionabilityCh
               paddingAngle={2}
               dataKey="value"
               label={({ name, percent }) =>
-                `${(percent * 100).toFixed(0)}%`
+                `${((percent ?? 0) * 100).toFixed(0)}%`
               }
               labelLine={false}
             >
