@@ -214,10 +214,14 @@ export async function fetchFeed(url: string, retries = 1): Promise<ParsedFeed> {
       // Clear timeout on successful response
       clearTimeout(timeoutId);
 
-      // Handle rate limiting - skip immediately instead of waiting (faster for demo)
+      // Handle rate limiting - wait and retry
       if (response.status === 429) {
-        console.warn(`Rate limited on ${url} - skipping (try again later)`);
-        throw new Error(`Skipped: Rate limited by ${isReddit ? 'Reddit' : 'server'}`);
+        console.warn(`Rate limited on ${url} - waiting before retry`);
+        // Wait 15-20 seconds before retry (Reddit needs longer cooldown)
+        const rateLimitWait = isReddit ? 15000 + Math.random() * 5000 : 5000 + Math.random() * 3000;
+        await sleep(rateLimitWait);
+        lastError = new Error(`Rate limited by ${isReddit ? 'Reddit' : 'server'}`);
+        continue; // Go to next retry attempt
       }
 
       if (!response.ok) {

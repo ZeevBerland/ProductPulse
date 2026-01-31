@@ -35,8 +35,9 @@ export const fetchSource = internalAction({
     }
 
     try {
-      // Fetch and parse the feed
-      const feed = await fetchFeed(source.feedUrl);
+      // Fetch and parse the feed (more retries for Reddit due to rate limiting)
+      const isReddit = source.feedUrl.includes("reddit.com");
+      const feed = await fetchFeed(source.feedUrl, isReddit ? 2 : 1);
 
       // Calculate cutoff date (items older than MAX_ITEM_AGE_DAYS are skipped)
       const cutoffDate = Date.now() - (MAX_ITEM_AGE_DAYS * 24 * 60 * 60 * 1000);
