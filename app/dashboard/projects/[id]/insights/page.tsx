@@ -131,7 +131,7 @@ export default function InsightsPage({
       const result = await triggerAnalysis();
       toast({
         title: "Analysis complete",
-        description: `Analyzed ${result.analyzed} items. ${result.skipped} skipped (low relevance).`,
+        description: `Analyzed ${result.successful} items. ${result.skipped} skipped (low relevance).`,
       });
     } catch (error) {
       toast({
